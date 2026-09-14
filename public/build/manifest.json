@@ -336,7 +336,7 @@
     "src": "public/images/pattern-baobab.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CG8_wkGM.css",
+    "file": "assets/app-CWLSPF6_.css",
     "name": "app",
     "names": [
       "app.css"
@@ -690,7 +690,7 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-WC50ey1P.js",
+    "file": "assets/app-CfnZHjxX.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -732,7 +732,7 @@
       "resources/js/Pages/Site/Verifier.vue"
     ],
     "css": [
-      "assets/app-CG8_wkGM.css"
+      "assets/app-CWLSPF6_.css"
     ],
     "assets": [
       "assets/fraunces-vietnamese-standard-normal-Czevyj-6.woff2",

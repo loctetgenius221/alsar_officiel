@@ -230,6 +230,30 @@
     .prose-alsar :where(p) {
         margin-top: 1.1em;
         line-height: var(--text-body--line-height);
+
+        /*
+         * Corps d'article justifié (registre éditorial, cf. §3.3 « colonnes de texte étroites
+         * façon magazine »). La césure automatique n'est PAS un détail : sans elle, justifier
+         * une colonne étroite (≈ 310 px sur un mobile 360) creuse des blancs énormes entre les
+         * mots et des « lézards » verticaux — c'est précisément ce qui fait qu'un texte
+         * justifié passe pour bâclé. `<html lang="fr">` (resources/views/app.blade.php) fournit
+         * au navigateur le dictionnaire de césure français.
+         */
+        text-align: justify;
+        -webkit-hyphens: auto;
+        hyphens: auto;
+
+        /* Un mot insécable trop long (URL collée, nom composé) laisserait sinon une ligne
+           presque vide au-dessus de lui. */
+        overflow-wrap: break-word;
+    }
+
+    /* Une citation fait deux ou trois lignes : la justifier étirerait chaque ligne de façon
+       visible. On garde le fer à gauche, comme les titres. */
+    .prose-alsar :where(blockquote p) {
+        text-align: left;
+        -webkit-hyphens: manual;
+        hyphens: manual;
     }
 
     .prose-alsar :where(p:first-child) {
