@@ -45,14 +45,30 @@ useParallax(featuredImage, 8);
                  que de laisser les réseaux sociaux choisir une image au hasard sur la page. -->
             <meta property="og:type" content="article" />
             <meta property="og:title" :content="article.seoTitle || article.title" />
-            <meta property="og:description" :content="article.seoDescription || article.excerpt || undefined" />
+            <meta
+                property="og:description"
+                :content="article.seoDescription || article.excerpt || undefined"
+            />
             <meta property="og:image" :content="article.ogImage" />
             <meta name="twitter:card" content="summary_large_image" />
         </Head>
 
+        <!-- En-tête éditorial : image de fond laissée strictement inchangée (demande explicite
+        de ne pas y toucher), la photo ci-dessus s'ajoute simplement au-dessus. -->
+        <PageHeader
+            :kicker="article.category"
+            :title="article.title"
+            :intro="article.date ?? undefined"
+            :image="article.image ?? undefined"
+            image-alt="ALSAR — photo d’illustration"
+            image-position="top"
+        />
         <!-- Photo mise en avant, au-dessus de l'en-tête ET du contenu — s'ajoute à celle déjà
              affichée en arrière-plan de PageHeader juste en dessous, ne la remplace pas. -->
-        <div v-if="article.image" class="mx-auto max-w-4xl px-6 pt-24 sm:px-10 sm:pt-28">
+        <div
+            v-if="article.image"
+            class="mx-auto -mt-38 max-w-4xl px-6 pt-24 sm:px-10 sm:pt-28 md:-mt-40 lg:-mt-45"
+        >
             <div class="aspect-video overflow-hidden rounded-2xl bg-ink shadow-lg shadow-ink/10">
                 <img
                     ref="featuredImage"
@@ -63,17 +79,6 @@ useParallax(featuredImage, 8);
                 />
             </div>
         </div>
-
-        <!-- En-tête éditorial : image de fond laissée strictement inchangée (demande explicite
-             de ne pas y toucher), la photo ci-dessus s'ajoute simplement au-dessus. -->
-        <PageHeader
-            :kicker="article.category"
-            :title="article.title"
-            :intro="article.date ?? undefined"
-            :image="article.image ?? undefined"
-            image-alt="ALSAR — photo d’illustration"
-            image-position="top"
-        />
 
         <div class="mx-auto max-w-3xl px-6 py-16 sm:px-10">
             <p v-if="article.excerpt" class="font-sans text-lg text-ink-soft">{{ article.excerpt }}</p>

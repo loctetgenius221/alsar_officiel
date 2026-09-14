@@ -35,7 +35,10 @@ const statTargets = ref<HTMLElement[]>([]);
 const statValues = props.section.stats.map((stat, i) => {
     if (stat.mode === 'static') return ref(stat.value);
     const target = computed(() => statTargets.value[i] ?? null);
-    const end = stat.mode === 'count_up_year' ? new Date().getFullYear() - parseInt(stat.value, 10) : parseInt(stat.value, 10);
+    const end =
+        stat.mode === 'count_up_year'
+            ? new Date().getFullYear() - parseInt(stat.value, 10)
+            : parseInt(stat.value, 10);
     return useCountUp(target, end).value;
 });
 
@@ -52,8 +55,10 @@ useScrollReveal(introRef, { stagger: 0.1 });
                 class="pointer-events-none absolute inset-0 hidden overflow-hidden lg:block"
                 aria-hidden="true"
             >
-                <div class="absolute -inset-y-24 right-55 w-35 rotate-10 bg-gold-300/65"></div>
-                <div class="absolute -inset-y-24 right-15 w-35 rotate-10 bg-terracotta-500/65"></div>
+                <div class="absolute -inset-y-24 right-55 w-35 rotate-10 bg-gold-300/65 opacity-50"></div>
+                <div
+                    class="absolute -inset-y-24 right-15 w-35 rotate-10 bg-terracotta-500/65 opacity-50"
+                ></div>
             </div>
 
             <div class="lg:col-span-6">
@@ -87,7 +92,12 @@ useScrollReveal(introRef, { stagger: 0.1 });
 
             <div class="lg:col-span-6 lg:col-start-7 lg:self-center">
                 <div class="">
-                    <VideoFrame :src="section.video.url ?? undefined" :alt="section.video.alt" ratio="video" rounded />
+                    <VideoFrame
+                        :src="section.video.url ?? undefined"
+                        :alt="section.video.alt"
+                        ratio="video"
+                        rounded
+                    />
                 </div>
                 <div class="relative z-10 mt-3 flex items-center justify-between gap-4">
                     <MotifDivider size="sm" />

@@ -12,7 +12,7 @@ import type { PublicArticle } from '@/lib/articles';
 const props = defineProps<{ articles: PublicArticle[] }>();
 
 const featuredImg = ref<HTMLImageElement | null>(null);
-useParallax(featuredImg);
+useParallax(featuredImg, 2);
 
 const newsGrid = ref<HTMLElement | null>(null);
 useScrollReveal(newsGrid, { stagger: 0.15 });
