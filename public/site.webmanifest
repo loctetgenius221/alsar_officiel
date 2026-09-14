@@ -1,0 +1,11 @@
+{
+    "name": "ALSAR — Alliance pour la Synergie des Actions Républicaines",
+    "short_name": "ALSAR",
+    "icons": [
+        { "src": "/images/favicon-192.png", "sizes": "192x192", "type": "image/png" },
+        { "src": "/images/favicon-512.png", "sizes": "512x512", "type": "image/png" }
+    ],
+    "theme_color": "#faf7f1",
+    "background_color": "#faf7f1",
+    "display": "standalone"
+}

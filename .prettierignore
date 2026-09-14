@@ -1,0 +1,7 @@
+vendor
+node_modules
+public/build
+bootstrap/cache
+storage
+*.blade.php
+resources/js/ziggy.js

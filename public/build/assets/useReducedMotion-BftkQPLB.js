@@ -1,0 +1,1 @@
+import{Ut as e,Yn as t,zt as n}from"./dist-COD7-oKm.js";function r(){let r=t(!1),i=null,a=()=>{r.value=i?.matches??!1};return n(()=>{i=window.matchMedia(`(prefers-reduced-motion: reduce)`),a(),i.addEventListener(`change`,a)}),e(()=>{i?.removeEventListener(`change`,a)}),{prefersReducedMotion:r}}export{r as t};
