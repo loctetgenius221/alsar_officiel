@@ -1,0 +1,1 @@
+import{Jn as e}from"./createLucideIcon-JQYoB9vk.js";var t={confirmLabel:`Confirmer`,cancelLabel:`Annuler`,tone:`default`},n=e({open:!1,options:{title:``,...t}}),r=null;function i(e){return r?.(!1),n.options={...t,...e},n.open=!0,new Promise(e=>{r=e})}function a(e){n.open=!1,r?.(e),r=null}export{n,a as r,i as t};

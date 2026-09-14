@@ -60,6 +60,24 @@ class PageSectionSchemas
     }
 
     /**
+     * Libellés lisibles de chaque chemin validé, en miroir de validationRules() — ex.
+     * 'sections.hero.slides.*.image.file' => 'Héros → Diaporama → Image'. Sans ça, un message
+     * d'erreur afficherait le chemin technique brut à un utilisateur non développeur.
+     * Consommé par UpdatePageContentRequest::attributes().
+     */
+    public static function attributeLabels(string $slug): array
+    {
+        $labels = [];
+        foreach (self::for($slug) as $sectionKey => $section) {
+            foreach ($section['fields'] as $fieldKey => $field) {
+                self::collectLabels($labels, "sections.{$sectionKey}.{$fieldKey}", $section['label'], $field);
+            }
+        }
+
+        return $labels;
+    }
+
+    /**
      * Remplace chaque champ `image` ({path, alt}) par ({url, alt}) pour l'affichage public ET
      * pour les aperçus de l'écran d'édition admin — parcourt le schéma (pas le JSON brut) pour
      * savoir exactement où se trouvent les champs image, y compris imbriqués dans un répéteur.
@@ -124,6 +142,38 @@ class PageSectionSchemas
         }
 
         $rules[$path] = $field['rules'];
+    }
+
+    /**
+     * Pendant exact de collectRules() : même parcours récursif, mais qui accumule un libellé
+     * « fil d'Ariane » (« Section → Répéteur → Champ ») au lieu de règles de validation.
+     */
+    private static function collectLabels(array &$labels, string $path, string $prefix, array $field): void
+    {
+        $label = trim("{$prefix} → {$field['label']}", ' →');
+
+        if ($field['type'] === 'repeater') {
+            $labels[$path] = $label;
+            foreach ($field['fields'] as $subKey => $subField) {
+                self::collectLabels($labels, "{$path}.*.{$subKey}", $label, $subField);
+            }
+
+            return;
+        }
+
+        if ($field['type'] === 'image') {
+            // `.file` est le seul de ces quatre chemins qu'un utilisateur reconnaît comme
+            // « le fichier que je viens de choisir » — les autres sont des détails de
+            // transport, autant leur donner un nom explicite plutôt qu'un chemin brut.
+            $labels["{$path}.file"] = $label;
+            $labels["{$path}.alt"] = "{$label} (description de l'image)";
+            $labels["{$path}.path"] = $label;
+            $labels["{$path}.remove"] = $label;
+
+            return;
+        }
+
+        $labels[$path] = $label;
     }
 
     private static function resolveFields(array $fields, array $values): array
@@ -300,7 +350,7 @@ class PageSectionSchemas
                     'stats' => self::repeater('Chiffres clés', [
                         'mode' => [
                             'type' => 'text',
-                            'label' => "Mode (count_up_year, count_up_number ou static)",
+                            'label' => 'Mode (count_up_year, count_up_number ou static)',
                             'rules' => ['nullable', 'string'],
                         ],
                         'value' => self::text('Valeur (année de départ, cible du compteur, ou texte statique)', max: 20),

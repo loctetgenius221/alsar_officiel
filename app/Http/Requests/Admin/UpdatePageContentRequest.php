@@ -27,6 +27,19 @@ class UpdatePageContentRequest extends FormRequest
     }
 
     /**
+     * Noms de champs lisibles dérivés du schéma (« Héros → Titre ») : sans ça, un message
+     * d'erreur afficherait « Le champ sections.hero.headline est obligatoire » à un
+     * utilisateur non technique.
+     */
+    public function attributes(): array
+    {
+        /** @var PageContent $page */
+        $page = $this->route('pageContent');
+
+        return PageSectionSchemas::attributeLabels($page->slug);
+    }
+
+    /**
      * Garde-fou contre l'incident de prod où une requête vide a écrasé tout le contenu d'une
      * page : `UpdatePageContent` fusionne désormais les champs réellement soumis sur l'existant
      * (une valeur absente/`null` ne remplace plus rien), mais si la requête entière ne contient

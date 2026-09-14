@@ -9,8 +9,16 @@ import { configure } from 'vee-validate';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Ziggy } from './ziggy';
+import Toaster from '@/Components/ui/Toaster.vue';
+import ConfirmDialog from '@/Components/ui/ConfirmDialog.vue';
+import { registerInertiaFeedback } from '@/lib/inertia-feedback';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Notifications et confirmations : branchées ici plutôt que dans chaque layout, pour qu'un
+// message déclenché pendant une navigation (flash serveur, session expirée) survive au
+// changement de page — un composant monté dans un layout serait démonté au même instant.
+registerInertiaFeedback();
 
 // Validation live sur tous les formulaires vee-validate (wizard d'adhésion) : un champ se
 // valide dès qu'il est modifié, pas seulement au clic sur "Continuer".
@@ -32,7 +40,10 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ) as Promise<DefineComponent>,
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        // Le fragment (tableau de vnodes) place Toaster et ConfirmDialog À CÔTÉ de la page, pas
+        // dedans : ils ne sont donc jamais démontés par une navigation Inertia, et une
+        // confirmation ouverte ou un toast affiché survivent au changement d'écran.
+        createApp({ render: () => [h(App, props), h(Toaster), h(ConfirmDialog)] })
             .use(plugin)
             .use(createPinia())
             .use(ZiggyVue, Ziggy)

@@ -113,6 +113,70 @@
     }
 }
 
+@keyframes alsar-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(-0.5rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Au-delà de `sm`, la pile passe en bas à droite : l'entrée vient donc de la droite. */
+@media (min-width: 640px) {
+    @keyframes alsar-toast-in {
+        from {
+            opacity: 0;
+            transform: translateX(1.5rem);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}
+
+@keyframes alsar-toast-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+}
+
+@keyframes alsar-toast-timer {
+    from {
+        transform: scaleX(1);
+    }
+    to {
+        transform: scaleX(0);
+    }
+}
+
+@keyframes alsar-confirm-overlay-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes alsar-confirm-panel-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -46%) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
 @layer base {
     html {
         -webkit-text-size-adjust: 100%;
@@ -229,6 +293,56 @@
         height: 0;
         color: var(--color-sand-400);
         pointer-events: none;
+    }
+
+    /*
+     * Notifications (Components/ui/Toaster.vue) et boîte de confirmation
+     * (Components/ui/ConfirmDialog.vue). Les états sont pilotés par les attributs
+     * `data-state` / `data-swipe` que posent les primitives Reka UI ; les règles vivent ici
+     * plutôt que dans un `<style>` de composant pour suivre la convention du projet (tout le
+     * CSS dans ce fichier) et garder une seule feuille de style à charger.
+     */
+    .alsar-toast[data-state='open'] {
+        animation: alsar-toast-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .alsar-toast[data-state='closed'],
+    .alsar-toast[data-swipe='end'] {
+        animation: alsar-toast-out 160ms ease-in;
+    }
+
+    .alsar-toast[data-swipe='move'] {
+        transform: translateX(var(--reka-toast-swipe-move-x));
+    }
+
+    .alsar-toast[data-swipe='cancel'] {
+        transform: translateX(0);
+        transition: transform 180ms ease-out;
+    }
+
+    /* Compte à rebours visible du minuteur de fermeture. Reka met ce minuteur en pause au
+       survol et au focus : la barre doit suivre, sinon elle annoncerait un temps restant faux. */
+    .alsar-toast-timer {
+        animation: alsar-toast-timer linear forwards;
+    }
+
+    .alsar-toast:hover .alsar-toast-timer,
+    .alsar-toast:focus-within .alsar-toast-timer {
+        animation-play-state: paused;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .alsar-toast-timer {
+            display: none;
+        }
+    }
+
+    .alsar-confirm-overlay[data-state='open'] {
+        animation: alsar-confirm-overlay-in 180ms ease-out;
+    }
+
+    .alsar-confirm-panel[data-state='open'] {
+        animation: alsar-confirm-panel-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     /* Défilement horizontal sans barre visible (ex. fil d'ancres de l'éditeur de contenu) —

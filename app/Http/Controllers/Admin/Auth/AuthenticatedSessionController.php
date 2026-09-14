@@ -23,8 +23,11 @@ class AuthenticatedSessionController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            // Message volontairement identique que l'email existe ou non (pas d'énumération
+            // de comptes, CLAUDE.md §8), mais actionnable : la casse du mot de passe est la
+            // cause n°1 d'échec sur un clavier mobile.
             throw ValidationException::withMessages([
-                'email' => 'Identifiants incorrects.',
+                'email' => trans('auth.failed'),
             ]);
         }
 

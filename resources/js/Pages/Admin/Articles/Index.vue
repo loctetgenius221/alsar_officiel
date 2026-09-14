@@ -14,6 +14,7 @@ import Select from '@/Components/ui/Select.vue';
 import Button from '@/Components/ui/Button.vue';
 import Pagination from '@/Components/admin/Pagination.vue';
 import { articleStatus } from '@/lib/status';
+import { confirmAction } from '@/lib/confirm';
 import { Trash2 } from '@lucide/vue';
 
 defineOptions({ layout: AdminLayout });
@@ -66,8 +67,19 @@ const statusOptions = [
     { value: 'published', label: 'Publié' },
 ];
 
-function destroy(article: { id: number; title: string }) {
-    if (!confirm(`Supprimer l'article « ${article.title} » ?`)) return;
+async function destroy(article: { id: number; title: string }) {
+    // Suppression depuis une liste : le risque de se tromper de ligne est réel, donc le titre
+    // exact de l'article concerné est repris dans la question (cf. lib/confirm.ts).
+    const confirmed = await confirmAction({
+        title: `Supprimer l'article « ${article.title || 'Sans titre'} » ?`,
+        description:
+            "Il sera retiré du site public immédiatement. Cette suppression est définitive : le texte et l'image de couverture ne pourront pas être récupérés.",
+        confirmLabel: 'Supprimer définitivement',
+        cancelLabel: 'Conserver',
+        tone: 'danger',
+    });
+    if (!confirmed) return;
+
     router.delete(`/admin/actualites/${article.id}`, { preserveScroll: true });
 }
 </script>
@@ -84,8 +96,20 @@ function destroy(article: { id: number; title: string }) {
         <Card>
             <div class="grid gap-4 sm:grid-cols-3">
                 <Input id="search" v-model="search" label="Recherche" placeholder="Titre..." />
-                <Select id="category" v-model="category" label="Catégorie" :options="categoryOptions" placeholder="Toutes" />
-                <Select id="status" v-model="status" label="Statut" :options="statusOptions" placeholder="Tous" />
+                <Select
+                    id="category"
+                    v-model="category"
+                    label="Catégorie"
+                    :options="categoryOptions"
+                    placeholder="Toutes"
+                />
+                <Select
+                    id="status"
+                    v-model="status"
+                    label="Statut"
+                    :options="statusOptions"
+                    placeholder="Tous"
+                />
             </div>
         </Card>
 
@@ -123,7 +147,9 @@ function destroy(article: { id: number; title: string }) {
                                     {{ articleStatus(article.status).label }}
                                 </Badge>
                             </td>
-                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft">{{ article.publishedAt ?? '—' }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft">
+                                {{ article.publishedAt ?? '—' }}
+                            </td>
                             <td class="px-6 py-3 whitespace-nowrap text-ink-soft">{{ article.updatedAt }}</td>
                             <td class="px-6 py-3 text-right whitespace-nowrap">
                                 <button
@@ -143,7 +169,12 @@ function destroy(article: { id: number; title: string }) {
                 Aucun article ne correspond à ces filtres.
             </p>
 
-            <Pagination :links="articles.links" :from="articles.from" :to="articles.to" :total="articles.total" />
+            <Pagination
+                :links="articles.links"
+                :from="articles.from"
+                :to="articles.to"
+                :total="articles.total"
+            />
         </Card>
     </div>
 </template>

@@ -44,7 +44,10 @@ function isImageValue(value: FieldValue): value is ImageFieldValue {
 }
 
 const imageModel = computed<ImageFieldValue>({
-    get: () => (isImageValue(model.value) ? model.value : { path: null, url: null, alt: '', file: null, remove: false }),
+    get: () =>
+        isImageValue(model.value)
+            ? model.value
+            : { path: null, url: null, alt: '', file: null, remove: false },
     set: (value) => {
         model.value = value;
     },
@@ -59,7 +62,10 @@ const repeaterModel = computed<FieldRecord[]>({
 </script>
 
 <template>
-    <div>
+    <!-- `data-error-anchor` : cible du récapitulatif d'erreurs en tête de formulaire
+         (Components/ui/FormErrorSummary.vue), qui doit pouvoir amener la vue sur n'importe
+         quel champ, y compris au fond d'un répéteur. -->
+    <div :data-error-anchor="path">
         <Input v-if="field.type === 'text'" v-model="textModel" :label="field.label" :error="error" />
 
         <div v-else-if="field.type === 'textarea'">
@@ -95,7 +101,11 @@ const repeaterModel = computed<FieldRecord[]>({
                 <div class="flex-1">
                     <Select v-model="textModel" :options="iconSelectOptions" placeholder="Aucune" />
                 </div>
-                <component :is="resolveIcon(textModel)" class="size-5 shrink-0 text-gold-600" aria-hidden="true" />
+                <component
+                    :is="resolveIcon(textModel)"
+                    class="size-5 shrink-0 text-gold-600"
+                    aria-hidden="true"
+                />
             </div>
             <p v-if="error" class="mt-1 font-sans text-xs text-danger">{{ error }}</p>
         </div>

@@ -6,15 +6,19 @@
  * PHP seul, aucun fichier Vue à toucher. `ICON_NAMES` alimente tous les `select_icon` du
  * schéma (aujourd'hui uniquement les axes du Programme).
  */
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { Head, useForm, setLayoutProps } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Card from '@/Components/ui/Card.vue';
 import Input from '@/Components/ui/Input.vue';
 import Button from '@/Components/ui/Button.vue';
+import FormErrorSummary from '@/Components/ui/FormErrorSummary.vue';
 import SchemaField from '@/Components/admin/SchemaField.vue';
 import { prepareFormSections, type PageSchema } from '@/lib/page-content-schema';
 import { ICON_NAMES } from '@/lib/icon-registry';
+import { sectionFieldLabels } from '@/lib/field-labels';
+import { focusFirstError } from '@/lib/form-errors';
+import { useUnsavedChanges } from '@/Composables/useUnsavedChanges';
 
 defineOptions({ layout: AdminLayout });
 
@@ -39,8 +43,27 @@ const form = useForm({
     seo_description: props.page.seoDescription ?? '',
 });
 
+// Formulaire long (plusieurs sections, textes riches, répéteurs de photos) : c'est ici que
+// quitter la page par erreur coûte le plus cher.
+const isDirty = computed(() => form.isDirty);
+useUnsavedChanges(isDirty, {
+    title: 'Quitter sans enregistrer le contenu ?',
+    description:
+        'Les modifications apportées à cette page ne sont pas encore en ligne. Si vous partez maintenant, elles seront perdues.',
+});
+
+// Noms lisibles (« Héros → Titre ») dérivés du schéma, pour que le récapitulatif d'erreurs
+// n'affiche jamais un chemin technique du type `sections.hero.headline`.
+const fieldLabels = computed(() => sectionFieldLabels(props.schema));
+
 function submit() {
-    form.patch(`/admin/contenu-des-pages/${props.page.slug}`, { preserveScroll: true });
+    form.patch(`/admin/contenu-des-pages/${props.page.slug}`, {
+        preserveScroll: true,
+        // Remet le repère « non enregistré » à zéro : sans ça, la page resterait marquée
+        // modifiée juste après un enregistrement réussi.
+        onSuccess: () => form.defaults(),
+        onError: (errors) => focusFirstError(errors),
+    });
 }
 
 // --- Fil d'ancres : suivi de la section visible (scroll-spy) --------------------------------
@@ -83,10 +106,26 @@ onBeforeUnmount(() => observer?.disconnect());
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h2 class="font-display text-2xl text-ink">{{ page.label }}</h2>
-                <p v-if="form.recentlySuccessful" class="mt-1 font-sans text-sm text-gold-700">Enregistré.</p>
+                <!-- Le succès est désormais annoncé par une notification (lib/inertia-feedback.ts) ;
+                     ce repère-ci répond à la question inverse, celle qu'on se pose en cours de
+                     travail : « me reste-t-il quelque chose à enregistrer ? ». -->
+                <p v-if="form.isDirty" class="mt-1 font-sans text-sm text-warning">
+                    Modifications non enregistrées
+                </p>
+                <p v-else-if="form.recentlySuccessful" class="mt-1 font-sans text-sm text-success">
+                    Tout est enregistré.
+                </p>
             </div>
-            <Button type="submit" :disabled="form.processing">Enregistrer</Button>
+            <Button type="submit" :disabled="form.processing">
+                {{ form.processing ? 'Enregistrement…' : 'Enregistrer' }}
+            </Button>
         </div>
+
+        <FormErrorSummary
+            :errors="form.errors"
+            :labels="fieldLabels"
+            title="Le contenu de la page n'a pas pu être enregistré"
+        />
 
         <!-- Repères de section : la page peut être longue (plusieurs sections, répéteurs de
              photos) — un fil d'ancres permet de sauter directement à une section plutôt que
@@ -127,7 +166,12 @@ onBeforeUnmount(() => observer?.disconnect());
             </a>
         </nav>
 
-        <Card v-for="(section, sectionKey) in schema" :id="`section-${sectionKey}`" :key="sectionKey" class="scroll-mt-14 space-y-5">
+        <Card
+            v-for="(section, sectionKey) in schema"
+            :id="`section-${sectionKey}`"
+            :key="sectionKey"
+            class="scroll-mt-14 space-y-5"
+        >
             <h3 class="font-display text-lg text-ink">{{ section.label }}</h3>
             <div class="grid gap-5 sm:grid-cols-2">
                 <SchemaField
@@ -161,12 +205,16 @@ onBeforeUnmount(() => observer?.disconnect());
                     maxlength="170"
                     class="mt-2 w-full border border-sand-300 bg-paper px-4 py-2.5 font-sans text-sm text-ink focus-visible:border-gold-500"
                 />
-                <p class="mt-1 font-sans text-xs text-ink-soft">{{ (form.seo_description ?? '').length }}/170</p>
+                <p class="mt-1 font-sans text-xs text-ink-soft">
+                    {{ (form.seo_description ?? '').length }}/170
+                </p>
             </div>
         </Card>
 
         <div class="flex justify-end">
-            <Button type="submit" :disabled="form.processing">Enregistrer</Button>
+            <Button type="submit" :disabled="form.processing">
+                {{ form.processing ? 'Enregistrement…' : 'Enregistrer' }}
+            </Button>
         </div>
     </form>
 </template>

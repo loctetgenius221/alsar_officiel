@@ -83,9 +83,15 @@ class MemberController extends Controller
 
     public function toggleStatus(Member $member): RedirectResponse
     {
-        (new ToggleMemberStatus())->handle($member, Auth::user());
+        (new ToggleMemberStatus)->handle($member, Auth::user());
 
-        return back()->with('success', 'Statut mis à jour.');
+        // On nomme le NOUVEL état plutôt que de dire « mis à jour » : le bouton étant une
+        // bascule, c'est la seule formulation qui lève le doute sans aller relire le badge.
+        $message = $member->refresh()->status === 'active'
+            ? "{$member->first_name} {$member->last_name} est de nouveau un adhérent actif."
+            : "{$member->first_name} {$member->last_name} a été désactivé : sa carte de membre n'est plus valide.";
+
+        return back()->with('success', $message);
     }
 
     public function updateNote(Request $request, Member $member): RedirectResponse
@@ -96,7 +102,7 @@ class MemberController extends Controller
 
         activity()->causedBy(Auth::user())->performedOn($member)->log('Note interne mise à jour');
 
-        return back()->with('success', 'Note enregistrée.');
+        return back()->with('success', 'Note interne enregistrée.');
     }
 
     public function resendCard(Member $member, ResendMembershipCard $resendMembershipCard): RedirectResponse
@@ -107,7 +113,7 @@ class MemberController extends Controller
             return back()->with('error', $exception->getMessage());
         }
 
-        return back()->with('success', 'Carte de membre renvoyée par email.');
+        return back()->with('success', "Carte de membre renvoyée à {$member->email}.");
     }
 
     public function export(Request $request): StreamedResponse

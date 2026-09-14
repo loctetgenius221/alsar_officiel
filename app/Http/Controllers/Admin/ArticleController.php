@@ -56,7 +56,7 @@ class ArticleController extends Controller
 
         return redirect()
             ->route('admin.articles.edit', $article)
-            ->with('success', 'Article créé.');
+            ->with('success', self::savedMessage($article, created: true));
     }
 
     public function edit(Article $article): InertiaResponse
@@ -83,16 +83,36 @@ class ArticleController extends Controller
     {
         $updateArticle->handle($article, $request->validated(), Auth::user());
 
-        return back()->with('success', 'Article mis à jour.');
+        return back()->with('success', self::savedMessage($article->refresh(), created: false));
     }
 
     public function destroy(Article $article): RedirectResponse
     {
         activity()->causedBy(Auth::user())->performedOn($article)->log('Article supprimé');
 
+        $title = $article->title ?: 'Sans titre';
         $article->delete();
 
-        return redirect()->route('admin.articles.index')->with('success', 'Article supprimé.');
+        return redirect()
+            ->route('admin.articles.index')
+            ->with('success', "L'article « {$title} » a été supprimé et n'apparaît plus sur le site.");
+    }
+
+    /**
+     * Un rédacteur ne se demande pas si « l'enregistrement a réussi » — il se demande si son
+     * article est en ligne ou non. Le message de confirmation répond donc à CETTE question,
+     * plutôt que de se contenter d'un « Article mis à jour. » qui laisse le doute entier.
+     */
+    private static function savedMessage(Article $article, bool $created): string
+    {
+        $verb = $created ? 'créé' : 'enregistré';
+
+        return match ($article->publicationStatus()) {
+            'published' => "Article {$verb} et publié : il est visible dès maintenant sur le site.",
+            'scheduled' => "Article {$verb}. Il sera publié automatiquement le "
+                .$article->published_at->translatedFormat('d F Y à H\hi').'.',
+            default => "Brouillon {$verb}. Il n'est pas encore visible sur le site public.",
+        };
     }
 
     private function filteredQuery(Request $request): Builder

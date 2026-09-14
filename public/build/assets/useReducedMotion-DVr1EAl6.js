@@ -1,0 +1,1 @@
+import{Bt as e,Wt as t,Xn as n}from"./createLucideIcon-JQYoB9vk.js";function r(){let r=n(!1),i=null,a=()=>{r.value=i?.matches??!1};return e(()=>{i=window.matchMedia(`(prefers-reduced-motion: reduce)`),a(),i.addEventListener(`change`,a)}),t(()=>{i?.removeEventListener(`change`,a)}),{prefersReducedMotion:r}}export{r as t};

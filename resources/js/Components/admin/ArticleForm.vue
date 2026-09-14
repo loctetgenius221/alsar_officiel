@@ -115,9 +115,15 @@ function removeCover() {
     <div class="grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             <Card class="space-y-5">
-                <Input id="title" v-model="form.title" label="Titre" :error="form.errors.title" />
+                <Input
+                    id="title"
+                    v-model="form.title"
+                    data-error-anchor="title"
+                    label="Titre"
+                    :error="form.errors.title"
+                />
 
-                <div>
+                <div data-error-anchor="slug">
                     <label for="slug" class="font-sans text-sm text-ink-soft">Slug (URL)</label>
                     <input
                         id="slug"
@@ -129,10 +135,12 @@ function removeCover() {
                     <p class="mt-1 font-sans text-xs text-ink-soft">
                         /actualites/<span class="text-ink">{{ form.slug || '…' }}</span>
                     </p>
-                    <p v-if="form.errors.slug" class="mt-1 font-sans text-xs text-danger">{{ form.errors.slug }}</p>
+                    <p v-if="form.errors.slug" class="mt-1 font-sans text-xs text-danger">
+                        {{ form.errors.slug }}
+                    </p>
                 </div>
 
-                <div>
+                <div data-error-anchor="excerpt">
                     <label for="excerpt" class="font-sans text-sm text-ink-soft">
                         Extrait <span class="text-ink-soft/70">(affiché dans les listes)</span>
                     </label>
@@ -143,16 +151,20 @@ function removeCover() {
                         maxlength="500"
                         class="mt-2 w-full border border-sand-300 bg-paper px-4 py-2.5 font-sans text-sm text-ink focus-visible:border-gold-500"
                     />
-                    <p v-if="form.errors.excerpt" class="mt-1 font-sans text-xs text-danger">{{ form.errors.excerpt }}</p>
+                    <p v-if="form.errors.excerpt" class="mt-1 font-sans text-xs text-danger">
+                        {{ form.errors.excerpt }}
+                    </p>
                 </div>
             </Card>
 
-            <Card>
+            <Card data-error-anchor="body">
                 <label class="font-sans text-sm text-ink-soft">Contenu de l'article</label>
                 <div class="mt-2">
                     <RichTextEditor v-model="form.body" />
                 </div>
-                <p v-if="form.errors.body" class="mt-1 font-sans text-xs text-danger">{{ form.errors.body }}</p>
+                <p v-if="form.errors.body" class="mt-1 font-sans text-xs text-danger">
+                    {{ form.errors.body }}
+                </p>
             </Card>
 
             <Card class="space-y-5">
@@ -160,12 +172,15 @@ function removeCover() {
                 <Input
                     id="seo_title"
                     v-model="form.seo_title"
+                    data-error-anchor="seo_title"
                     label="Titre SEO"
                     placeholder="Laisser vide pour réutiliser le titre de l'article"
                     :error="form.errors.seo_title"
                 />
-                <div>
-                    <label for="seo_description" class="font-sans text-sm text-ink-soft">Description SEO</label>
+                <div data-error-anchor="seo_description">
+                    <label for="seo_description" class="font-sans text-sm text-ink-soft"
+                        >Description SEO</label
+                    >
                     <textarea
                         id="seo_description"
                         v-model="form.seo_description"
@@ -174,13 +189,15 @@ function removeCover() {
                         placeholder="Laisser vide pour réutiliser l'extrait"
                         class="mt-2 w-full border border-sand-300 bg-paper px-4 py-2.5 font-sans text-sm text-ink focus-visible:border-gold-500"
                     />
-                    <p class="mt-1 font-sans text-xs text-ink-soft">{{ (form.seo_description ?? '').length }}/170</p>
+                    <p class="mt-1 font-sans text-xs text-ink-soft">
+                        {{ (form.seo_description ?? '').length }}/170
+                    </p>
                 </div>
             </Card>
         </div>
 
         <div class="space-y-6">
-            <Card>
+            <Card data-error-anchor="published_at">
                 <h3 class="font-display text-lg text-ink">Publication</h3>
                 <div class="mt-4 space-y-2">
                     <label class="flex items-center gap-2 font-sans text-sm text-ink">
@@ -207,7 +224,7 @@ function removeCover() {
                 </p>
             </Card>
 
-            <Card>
+            <Card data-error-anchor="category_id">
                 <label for="category" class="font-sans text-sm text-ink-soft">Catégorie</label>
                 <Select
                     id="category"
@@ -220,11 +237,14 @@ function removeCover() {
                 </p>
             </Card>
 
-            <Card>
+            <Card data-error-anchor="cover_image">
                 <label class="font-sans text-sm text-ink-soft">Image de couverture</label>
                 <div class="mt-3 aspect-video overflow-hidden border border-sand-300 bg-sand-100">
                     <img v-if="coverPreview" :src="coverPreview" alt="" class="size-full object-cover" />
-                    <div v-else class="flex size-full items-center justify-center font-sans text-xs text-ink-soft">
+                    <div
+                        v-else
+                        class="flex size-full items-center justify-center font-sans text-xs text-ink-soft"
+                    >
                         Aucune image
                     </div>
                 </div>

@@ -13,6 +13,8 @@ import SiteLayout from '@/Layouts/SiteLayout.vue';
 import PageHeader from '@/Components/site/PageHeader.vue';
 import StepIdentite from '@/Components/adhesion/StepIdentite.vue';
 import StepEngagement from '@/Components/adhesion/StepEngagement.vue';
+import FormErrorSummary from '@/Components/ui/FormErrorSummary.vue';
+import { ADHESION_FIELD_LABELS } from '@/lib/field-labels';
 import { useAdhesionStore } from '@/stores/adhesion';
 import { useLenis } from '@/Composables/useLenis';
 
@@ -156,6 +158,16 @@ function submit() {
             </li>
         </ol>
 
+        <!-- Récapitulatif au-dessus du formulaire (et non un simple message en bas de page) :
+             un refus serveur renvoie à l'étape concernée, encore faut-il que l'adhérent voie
+             tout de suite CE qui est en cause. Le libellé de chaque ligne renvoie au champ. -->
+        <FormErrorSummary
+            :errors="form.errors"
+            :labels="ADHESION_FIELD_LABELS"
+            title="Votre adhésion n'a pas pu être envoyée"
+            class="mb-8"
+        />
+
         <div class="border border-sand-200 bg-paper p-6 sm:p-10">
             <StepIdentite
                 v-if="store.state.step === 1"
@@ -171,9 +183,5 @@ function submit() {
                 @back="store.back()"
             />
         </div>
-
-        <p v-if="form.hasErrors" class="mt-6 font-sans text-sm text-danger">
-            Certaines informations doivent être corrigées — vérifiez les étapes précédentes.
-        </p>
     </div>
 </template>

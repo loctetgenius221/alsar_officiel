@@ -3,7 +3,7 @@
  * Liste des paiements (CLAUDE.md §6) : filtres statut/palier, confirmation manuelle d'un
  * paiement "pending" réglé hors-ligne (cash/virement) — cas réel pour le rôle Trésorier.
  */
-import { Head, router, setLayoutProps, usePage } from '@inertiajs/vue3';
+import { Head, router, setLayoutProps } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Card from '@/Components/ui/Card.vue';
@@ -12,6 +12,7 @@ import Select from '@/Components/ui/Select.vue';
 import Button from '@/Components/ui/Button.vue';
 import Pagination from '@/Components/admin/Pagination.vue';
 import { paymentStatus } from '@/lib/status';
+import { confirmAction } from '@/lib/confirm';
 
 defineOptions({ layout: AdminLayout });
 setLayoutProps({ title: 'Paiements' });
@@ -40,7 +41,6 @@ const props = defineProps<{
     tiers: Record<string, { label: string; amount: number }>;
 }>();
 
-const page = usePage();
 const status = ref(props.filters.status ?? '');
 const tier = ref(props.filters.tier ?? '');
 
@@ -56,11 +56,23 @@ function formatAmount(amount: number, currency: string): string {
     return `${new Intl.NumberFormat('fr-FR').format(amount)} ${currency}`;
 }
 
-function confirmManually(paymentId: number) {
-    if (!confirm('Confirmer ce paiement comme réglé hors-ligne (cash/virement) ?')) {
-        return;
-    }
-    router.post(`/admin/paiements/${paymentId}/confirmer`, {}, { preserveScroll: true });
+async function confirmManually(payment: {
+    id: number;
+    memberName: string;
+    amount: number;
+    currency: string;
+}) {
+    // Action comptable irréversible depuis l'interface : la question reprend le nom de
+    // l'adhérent et le montant exact, les deux points sur lesquels on peut se tromper de ligne.
+    const confirmed = await confirmAction({
+        title: `Enregistrer le paiement de ${payment.memberName} ?`,
+        description: `Vous déclarez avoir reçu ${formatAmount(payment.amount, payment.currency)} en espèces ou par virement. L'adhérent sera immédiatement activé et recevra sa carte de membre par email. Cette confirmation ne peut pas être annulée depuis le back-office.`,
+        confirmLabel: 'Confirmer le règlement',
+        cancelLabel: 'Annuler',
+    });
+    if (!confirmed) return;
+
+    router.post(`/admin/paiements/${payment.id}/confirmer`, {}, { preserveScroll: true });
 }
 
 const statusOptions = [
@@ -69,7 +81,10 @@ const statusOptions = [
     { value: 'failed', label: 'Échoué' },
     { value: 'refunded', label: 'Remboursé' },
 ];
-const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({ value, label: tierInfo.label }));
+const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({
+    value,
+    label: tierInfo.label,
+}));
 </script>
 
 <template>
@@ -78,16 +93,15 @@ const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({ va
     <div class="space-y-6">
         <h2 class="font-display text-2xl text-ink">Paiements</h2>
 
-        <p v-if="page.props.flash.success" class="border border-success/30 bg-success/10 px-4 py-3 font-sans text-sm text-success">
-            {{ page.props.flash.success }}
-        </p>
-        <p v-if="page.props.flash.error" class="border border-danger/30 bg-danger/10 px-4 py-3 font-sans text-sm text-danger">
-            {{ page.props.flash.error }}
-        </p>
-
         <Card>
             <div class="grid gap-4 sm:grid-cols-2">
-                <Select id="status" v-model="status" label="Statut" :options="statusOptions" placeholder="Tous" />
+                <Select
+                    id="status"
+                    v-model="status"
+                    label="Statut"
+                    :options="statusOptions"
+                    placeholder="Tous"
+                />
                 <Select id="tier" v-model="tier" label="Palier" :options="tierOptions" placeholder="Tous" />
             </div>
         </Card>
@@ -107,17 +121,34 @@ const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({ va
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="payment in payments.data" :key="payment.id" class="border-b border-sand-100 last:border-0">
+                        <tr
+                            v-for="payment in payments.data"
+                            :key="payment.id"
+                            class="border-b border-sand-100 last:border-0"
+                        >
                             <td class="px-6 py-3 whitespace-nowrap text-ink">{{ payment.memberName }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft capitalize">{{ payment.tier }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-ink">{{ formatAmount(payment.amount, payment.currency) }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap font-mono text-xs text-ink-soft">{{ payment.gatewayReference ?? '—' }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft capitalize">
+                                {{ payment.tier }}
+                            </td>
+                            <td class="px-6 py-3 whitespace-nowrap text-ink">
+                                {{ formatAmount(payment.amount, payment.currency) }}
+                            </td>
+                            <td class="px-6 py-3 font-mono text-xs whitespace-nowrap text-ink-soft">
+                                {{ payment.gatewayReference ?? '—' }}
+                            </td>
                             <td class="px-6 py-3 whitespace-nowrap">
-                                <Badge :tone="paymentStatus(payment.status).tone">{{ paymentStatus(payment.status).label }}</Badge>
+                                <Badge :tone="paymentStatus(payment.status).tone">{{
+                                    paymentStatus(payment.status).label
+                                }}</Badge>
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap text-ink-soft">{{ payment.createdAt }}</td>
                             <td class="px-6 py-3 whitespace-nowrap">
-                                <Button v-if="payment.status === 'pending'" size="sm" variant="secondary" @click="confirmManually(payment.id)">
+                                <Button
+                                    v-if="payment.status === 'pending'"
+                                    size="sm"
+                                    variant="secondary"
+                                    @click="confirmManually(payment)"
+                                >
                                     Confirmer
                                 </Button>
                             </td>
@@ -125,9 +156,16 @@ const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({ va
                     </tbody>
                 </table>
             </div>
-            <p v-else class="px-6 py-8 text-center font-sans text-sm text-ink-soft">Aucun paiement ne correspond à ces filtres.</p>
+            <p v-else class="px-6 py-8 text-center font-sans text-sm text-ink-soft">
+                Aucun paiement ne correspond à ces filtres.
+            </p>
 
-            <Pagination :links="payments.links" :from="payments.from" :to="payments.to" :total="payments.total" />
+            <Pagination
+                :links="payments.links"
+                :from="payments.from"
+                :to="payments.to"
+                :total="payments.total"
+            />
         </Card>
     </div>
 </template>

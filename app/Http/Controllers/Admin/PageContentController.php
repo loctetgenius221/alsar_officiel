@@ -57,6 +57,6 @@ class PageContentController extends Controller
             $validated['seo_description'] ?? null,
         );
 
-        return back()->with('success', 'Contenu mis à jour.');
+        return back()->with('success', "Page « {$pageContent->label} » enregistrée : les modifications sont visibles sur le site public.");
     }
 }

@@ -45,7 +45,7 @@ class PaymentController extends Controller
     public function confirmManually(MembershipPayment $payment, ConfirmMembershipPayment $confirmMembershipPayment): RedirectResponse
     {
         if ($payment->status !== 'pending') {
-            return back()->with('error', 'Ce paiement a déjà été traité.');
+            return back()->with('error', "Ce paiement a déjà été traité : aucune double confirmation n'a été enregistrée.");
         }
 
         $confirmMembershipPayment->handle($payment);
@@ -55,6 +55,6 @@ class PaymentController extends Controller
             ->performedOn($payment)
             ->log('Paiement confirmé manuellement (hors-ligne)');
 
-        return back()->with('success', 'Paiement confirmé, adhérent activé.');
+        return back()->with('success', "Paiement confirmé. L'adhérent est désormais actif et sa carte de membre lui a été envoyée par email.");
     }
 }

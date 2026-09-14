@@ -43,7 +43,11 @@ class StoreMemberRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'consent.accepted' => "Vous devez accepter les statuts et la politique de confidentialité pour adhérer.",
+            'consent.accepted' => 'Vous devez accepter les statuts et la politique de confidentialité pour adhérer.',
+            // Le honeypot n'est censé être rempli que par un robot, mais un gestionnaire de mots
+            // de passe trop zélé peut le remplir chez un vrai visiteur : le message doit donc
+            // rester compréhensible et lui laisser une porte de sortie, sans révéler le piège.
+            'website.prohibited' => "Votre demande n'a pas pu être vérifiée automatiquement. Rechargez la page puis réessayez ; si le problème persiste, contactez-nous directement.",
             'email.unique' => 'Cette adresse email est déjà associée à une adhésion.',
             'id_document_number.regex' => 'Numéro de pièce invalide (5 à 20 caractères alphanumériques).',
         ];

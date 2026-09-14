@@ -5,8 +5,8 @@
  * 2 champs seulement, la validation utile est côté serveur : identifiants corrects ou non).
  */
 import { Head, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { Eye, EyeOff } from '@lucide/vue';
+import { computed, ref } from 'vue';
+import { AlertCircle, Eye, EyeOff } from '@lucide/vue';
 
 const form = useForm({
     email: '',
@@ -15,6 +15,13 @@ const form = useForm({
 });
 
 const showPassword = ref(false);
+
+// Laravel renvoie l'échec d'authentification sur le champ `email` (sa convention), alors
+// qu'il ne désigne pas ce champ en particulier — le mot de passe est tout aussi suspect.
+// Affiché uniquement sous « Email », il se lisait donc comme « votre email est mal écrit ».
+// Sur un formulaire à deux champs, le plus clair est de tout regrouper dans un seul bandeau
+// au-dessus, qui couvre aussi bien l'échec de connexion qu'un champ laissé vide.
+const errorMessages = computed(() => [form.errors.email, form.errors.password].filter(Boolean) as string[]);
 
 function submit() {
     form.post('/admin/login', {
@@ -34,6 +41,17 @@ function submit() {
                 <p class="mt-1 font-sans text-sm text-ink-soft">Connectez-vous pour continuer.</p>
             </div>
 
+            <div
+                v-if="errorMessages.length"
+                role="alert"
+                class="mt-6 flex gap-3 border border-danger/30 bg-danger/5 px-4 py-3 font-sans text-sm text-ink-soft"
+            >
+                <AlertCircle class="mt-0.5 size-4 shrink-0 text-danger" aria-hidden="true" />
+                <div class="space-y-1">
+                    <p v-for="message in errorMessages" :key="message">{{ message }}</p>
+                </div>
+            </div>
+
             <form class="mt-8 space-y-5" novalidate @submit.prevent="submit">
                 <div>
                     <label for="email" class="font-sans text-sm text-ink-soft">Email</label>
@@ -43,9 +61,9 @@ function submit() {
                         type="email"
                         autocomplete="email"
                         autofocus
-                        class="mt-2 w-full border border-sand-300 bg-paper px-4 py-2.5 font-sans text-sm text-ink focus-visible:border-gold-500"
+                        class="mt-2 w-full border bg-paper px-4 py-2.5 font-sans text-sm text-ink focus-visible:border-gold-500"
+                        :class="errorMessages.length ? 'border-danger/50' : 'border-sand-300'"
                     />
-                    <p v-if="form.errors.email" class="mt-1 font-sans text-xs text-danger">{{ form.errors.email }}</p>
                 </div>
 
                 <div>
@@ -56,21 +74,21 @@ function submit() {
                             v-model="form.password"
                             :type="showPassword ? 'text' : 'password'"
                             autocomplete="current-password"
-                            class="w-full border border-sand-300 bg-paper px-4 py-2.5 pr-11 font-sans text-sm text-ink focus-visible:border-gold-500"
+                            class="w-full border bg-paper px-4 py-2.5 pr-11 font-sans text-sm text-ink focus-visible:border-gold-500"
+                            :class="errorMessages.length ? 'border-danger/50' : 'border-sand-300'"
                         />
                         <button
                             type="button"
                             class="absolute inset-y-0 right-0 flex items-center px-3 text-ink-soft transition-colors hover:text-ink"
-                            :aria-label="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+                            :aria-label="
+                                showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                            "
                             @click="showPassword = !showPassword"
                         >
                             <EyeOff v-if="showPassword" class="size-4.5" aria-hidden="true" />
                             <Eye v-else class="size-4.5" aria-hidden="true" />
                         </button>
                     </div>
-                    <p v-if="form.errors.password" class="mt-1 font-sans text-xs text-danger">
-                        {{ form.errors.password }}
-                    </p>
                 </div>
 
                 <label class="flex items-center gap-2 font-sans text-sm text-ink-soft">
@@ -83,7 +101,7 @@ function submit() {
                     :disabled="form.processing"
                     class="w-full bg-gold-500 px-5 py-3 font-sans text-sm font-medium text-ink transition-colors hover:bg-gold-600 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    Se connecter
+                    {{ form.processing ? 'Connexion…' : 'Se connecter' }}
                 </button>
             </form>
         </div>

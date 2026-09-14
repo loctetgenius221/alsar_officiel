@@ -10,6 +10,7 @@ import Card from '@/Components/ui/Card.vue';
 import Badge from '@/Components/ui/Badge.vue';
 import Button from '@/Components/ui/Button.vue';
 import { memberStatus, paymentStatus } from '@/lib/status';
+import { confirmAction } from '@/lib/confirm';
 
 defineOptions({ layout: AdminLayout });
 
@@ -51,14 +52,42 @@ setLayoutProps({ title: props.member.fullName });
 const noteForm = useForm({ note: props.member.note ?? '' });
 
 function saveNote() {
-    noteForm.patch(`/admin/adherents/${props.member.id}/note`, { preserveScroll: true });
+    noteForm.patch(`/admin/adherents/${props.member.id}/note`, {
+        preserveScroll: true,
+        // Remet le repère « non enregistré » à zéro une fois la note effectivement en base.
+        onSuccess: () => noteForm.defaults(),
+    });
 }
 
-function toggleStatus() {
+// Ces deux actions ont un effet HORS de l'écran (une carte de membre cesse d'être valide, un
+// email part réellement chez l'adhérent) : elles méritent une confirmation qui nomme cette
+// conséquence, ce qu'un simple bouton ne fait pas.
+async function toggleStatus() {
+    const deactivating = props.member.status === 'active';
+
+    const confirmed = await confirmAction({
+        title: deactivating
+            ? `Désactiver ${props.member.fullName} ?`
+            : `Réactiver ${props.member.fullName} ?`,
+        description: deactivating
+            ? "Sa carte de membre ne sera plus reconnue comme valide lors d'une vérification par QR code. Vous pourrez le réactiver à tout moment depuis cette même page."
+            : "L'adhérent redeviendra actif et sa carte de membre sera à nouveau reconnue comme valide.",
+        confirmLabel: deactivating ? 'Désactiver' : 'Réactiver',
+        tone: deactivating ? 'danger' : 'default',
+    });
+    if (!confirmed) return;
+
     router.patch(`/admin/adherents/${props.member.id}/statut`, {}, { preserveScroll: true });
 }
 
-function resendCard() {
+async function resendCard() {
+    const confirmed = await confirmAction({
+        title: 'Renvoyer la carte de membre ?',
+        description: `Un email contenant la carte au format PDF sera envoyé immédiatement à ${props.member.email}.`,
+        confirmLabel: "Envoyer l'email",
+    });
+    if (!confirmed) return;
+
     router.post(`/admin/adherents/${props.member.id}/renvoyer-carte`, {}, { preserveScroll: true });
 }
 
@@ -73,8 +102,15 @@ function formatAmount(amount: number, currency: string): string {
     <div class="space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-4">
-                <div class="flex size-14 shrink-0 items-center justify-center overflow-hidden border border-sand-200 bg-sand-100">
-                    <img v-if="member.photoUrl" :src="member.photoUrl" alt="" class="size-full object-cover" />
+                <div
+                    class="flex size-14 shrink-0 items-center justify-center overflow-hidden border border-sand-200 bg-sand-100"
+                >
+                    <img
+                        v-if="member.photoUrl"
+                        :src="member.photoUrl"
+                        alt=""
+                        class="size-full object-cover"
+                    />
                     <span v-else class="font-sans text-[10px] text-ink-soft/70">Photo</span>
                 </div>
                 <div>
@@ -88,7 +124,7 @@ function formatAmount(amount: number, currency: string): string {
         <div class="grid gap-6 lg:grid-cols-3">
             <Card class="lg:col-span-2">
                 <h3 class="font-display text-lg text-ink">Informations</h3>
-                <dl class="mt-4 grid gap-4 sm:grid-cols-2 font-sans text-sm">
+                <dl class="mt-4 grid gap-4 font-sans text-sm sm:grid-cols-2">
                     <div>
                         <dt class="text-ink-soft">Email</dt>
                         <dd class="text-ink">{{ member.email }}</dd>
@@ -170,12 +206,20 @@ function formatAmount(amount: number, currency: string): string {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="payment in payments" :key="payment.id" class="border-b border-sand-100 last:border-0">
+                        <tr
+                            v-for="payment in payments"
+                            :key="payment.id"
+                            class="border-b border-sand-100 last:border-0"
+                        >
                             <td class="py-2 whitespace-nowrap text-ink capitalize">{{ payment.tier }}</td>
-                            <td class="py-2 whitespace-nowrap text-ink">{{ formatAmount(payment.amount, payment.currency) }}</td>
+                            <td class="py-2 whitespace-nowrap text-ink">
+                                {{ formatAmount(payment.amount, payment.currency) }}
+                            </td>
                             <td class="py-2 whitespace-nowrap text-ink-soft">{{ payment.gateway }}</td>
                             <td class="py-2 whitespace-nowrap">
-                                <Badge :tone="paymentStatus(payment.status).tone">{{ paymentStatus(payment.status).label }}</Badge>
+                                <Badge :tone="paymentStatus(payment.status).tone">{{
+                                    paymentStatus(payment.status).label
+                                }}</Badge>
                             </td>
                             <td class="py-2 whitespace-nowrap text-ink-soft">{{ payment.paidAt ?? '—' }}</td>
                         </tr>
@@ -194,9 +238,20 @@ function formatAmount(amount: number, currency: string): string {
                     v-model="noteForm.note"
                     aria-label="Note interne"
                     rows="4"
+                    maxlength="5000"
                     class="w-full border border-sand-300 bg-paper px-4 py-2.5 font-sans text-sm text-ink focus-visible:border-gold-500"
                 />
-                <Button type="submit" size="sm" :disabled="noteForm.processing">Enregistrer la note</Button>
+                <p v-if="noteForm.errors.note" class="font-sans text-xs text-danger">
+                    {{ noteForm.errors.note }}
+                </p>
+                <div class="flex items-center gap-3">
+                    <Button type="submit" size="sm" :disabled="noteForm.processing">
+                        {{ noteForm.processing ? 'Enregistrement…' : 'Enregistrer la note' }}
+                    </Button>
+                    <span v-if="noteForm.isDirty" class="font-sans text-xs text-warning"
+                        >Note non enregistrée</span
+                    >
+                </div>
             </form>
         </Card>
     </div>
