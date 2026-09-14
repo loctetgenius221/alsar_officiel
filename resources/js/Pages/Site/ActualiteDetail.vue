@@ -6,11 +6,13 @@
  * l'ancien contenu statique n'ont pas de corps détaillé (jamais inventé) : le composant
  * l'assume honnêtement (ComingSoon) plutôt que d'afficher un vide.
  */
+import { ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import SiteLayout from '@/Layouts/SiteLayout.vue';
 import PageHeader from '@/Components/site/PageHeader.vue';
 import ComingSoon from '@/Components/ui/ComingSoon.vue';
 import { Newspaper } from '@lucide/vue';
+import { useParallax } from '@/Composables/useParallax';
 import type { PublicArticle } from '@/lib/articles';
 
 defineOptions({ layout: SiteLayout });
@@ -25,6 +27,12 @@ defineProps<{
           })
         | null;
 }>();
+
+// Photo mise en avant au-dessus de l'en-tête et du contenu (demande explicite : en plus de
+// celle déjà en arrière-plan de PageHeader, pas à sa place — cf. commentaire sur PageHeader
+// plus bas, laissé strictement inchangé).
+const featuredImage = ref<HTMLImageElement | null>(null);
+useParallax(featuredImage, 8);
 </script>
 
 <template>
@@ -42,6 +50,22 @@ defineProps<{
             <meta name="twitter:card" content="summary_large_image" />
         </Head>
 
+        <!-- Photo mise en avant, au-dessus de l'en-tête ET du contenu — s'ajoute à celle déjà
+             affichée en arrière-plan de PageHeader juste en dessous, ne la remplace pas. -->
+        <div v-if="article.image" class="mx-auto max-w-4xl px-6 pt-24 sm:px-10 sm:pt-28">
+            <div class="aspect-video overflow-hidden rounded-2xl bg-ink shadow-lg shadow-ink/10">
+                <img
+                    ref="featuredImage"
+                    :src="article.image"
+                    :alt="article.title"
+                    class="h-full w-full scale-125 object-cover"
+                    loading="eager"
+                />
+            </div>
+        </div>
+
+        <!-- En-tête éditorial : image de fond laissée strictement inchangée (demande explicite
+             de ne pas y toucher), la photo ci-dessus s'ajoute simplement au-dessus. -->
         <PageHeader
             :kicker="article.category"
             :title="article.title"

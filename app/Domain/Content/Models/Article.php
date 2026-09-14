@@ -74,7 +74,26 @@ class Article extends Model
             'date' => $this->published_at?->translatedFormat('j F Y'),
             'title' => $this->title,
             'excerpt' => $this->excerpt,
-            'image' => $this->cover_image ? Storage::disk('public')->url($this->cover_image) : null,
+            'image' => $this->coverImageUrl(),
         ];
+    }
+
+    /**
+     * Les chemins commençant par `/` sont des assets publics statiques hérités (articles
+     * migrés depuis l'ancien contenu en dur, ex. `/images/slider-img-1.webp`, jamais passés
+     * par un upload) et passent inchangés ; les chemins relatifs au disque `public` (upload
+     * normal depuis l'admin) sont résolus via Storage::url() — même principe que
+     * PageSectionSchemas::resolveUrl(). Sans cette distinction, un chemin absolu hérité se
+     * retrouvait préfixé de `/storage/` et pointait vers un fichier inexistant.
+     */
+    public function coverImageUrl(): ?string
+    {
+        if (! $this->cover_image) {
+            return null;
+        }
+
+        return str_starts_with($this->cover_image, '/')
+            ? $this->cover_image
+            : Storage::disk('public')->url($this->cover_image);
     }
 }

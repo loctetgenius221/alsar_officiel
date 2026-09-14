@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Site;
 use App\Domain\Content\Models\Article;
 use App\Domain\Content\Models\Category;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 
@@ -37,10 +36,10 @@ class ArticleController extends Controller
                 'seoDescription' => $article->seo_description,
                 // URL absolue exigée par Open Graph (les scrapers Facebook/Twitter ne résolvent
                 // pas les chemins relatifs) — le logo sert de repli si l'article n'a pas de
-                // couverture, jamais nu/vide sur un partage social.
-                'ogImage' => $article->cover_image
-                    ? Storage::disk('public')->url($article->cover_image)
-                    : url('/images/logo-alsar.png'),
+                // couverture, jamais nu/vide sur un partage social. `url()` complète un chemin
+                // racine hérité (`/images/...`) avec le domaine ; une URL déjà absolue (cas
+                // normal, résolue par Storage::url()) traverse `url()` inchangée.
+                'ogImage' => url($article->coverImageUrl() ?? '/images/logo-alsar.png'),
             ] : null,
         ]);
     }
