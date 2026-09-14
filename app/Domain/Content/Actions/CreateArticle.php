@@ -4,6 +4,7 @@ namespace App\Domain\Content\Actions;
 
 use App\Domain\Content\Actions\Concerns\GeneratesUniqueSlug;
 use App\Domain\Content\Models\Article;
+use App\Exceptions\FileStorageFailed;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 
@@ -19,9 +20,18 @@ class CreateArticle
 
     public function handle(array $data, User $author): Article
     {
-        $coverPath = isset($data['cover_image']) && $data['cover_image'] instanceof UploadedFile
-            ? $data['cover_image']->store('articles/covers', 'public')
-            : null;
+        $coverPath = null;
+
+        if (isset($data['cover_image']) && $data['cover_image'] instanceof UploadedFile) {
+            // `store()` renvoie `false` (et non une exception) quand l'écriture échoue, le
+            // disque `public` étant en `throw => false` : sans ce contrôle, l'article était
+            // créé avec `false` comme chemin d'image, sans erreur ni ligne de journal.
+            $coverPath = $data['cover_image']->store('articles/covers', 'public');
+
+            if (! is_string($coverPath) || $coverPath === '') {
+                throw FileStorageFailed::for($data['cover_image'], 'articles/covers');
+            }
+        }
 
         $title = $data['title'] ?: '(Sans titre)';
 

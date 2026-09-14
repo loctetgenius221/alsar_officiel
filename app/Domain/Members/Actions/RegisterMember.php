@@ -5,6 +5,8 @@ namespace App\Domain\Members\Actions;
 use App\Domain\Members\Models\Member;
 use App\Domain\Payments\Models\MembershipPayment;
 use App\Mail\MembershipConfirmed;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -21,9 +23,7 @@ class RegisterMember
 {
     public function handle(array $data, ?string $tier, ?int $amount): Member
     {
-        $photoPath = isset($data['photo'])
-            ? $data['photo']->store('members/photos', 'public')
-            : null;
+        $photoPath = $this->storePhoto($data['photo'] ?? null);
 
         $member = Member::create([
             'first_name' => $data['first_name'],
@@ -63,5 +63,31 @@ class RegisterMember
         }
 
         return $member->fresh('payments');
+    }
+
+    /**
+     * Contrairement aux images de l'administration, un échec d'écriture ne doit PAS faire
+     * échouer l'opération : refuser une adhésion parce que le serveur n'arrive pas à ranger
+     * une photo serait disproportionné. On enregistre donc le membre sans photo — mais on
+     * journalise l'incident, sans quoi il resterait invisible (le disque `public` est en
+     * `throw => false`, `store()` renvoie simplement `false`).
+     */
+    private function storePhoto(?UploadedFile $photo): ?string
+    {
+        if (! $photo instanceof UploadedFile) {
+            return null;
+        }
+
+        $path = $photo->store('members/photos', 'public');
+
+        if (! is_string($path) || $path === '') {
+            Log::error("Photo d'adhérent non enregistrée : écriture impossible sur le disque public.", [
+                'taille' => $photo->getSize(),
+            ]);
+
+            return null;
+        }
+
+        return $path;
     }
 }

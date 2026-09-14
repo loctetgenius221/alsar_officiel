@@ -4,6 +4,7 @@ namespace App\Domain\Content\Actions;
 
 use App\Domain\Content\Models\PageContent;
 use App\Domain\Content\PageSectionSchemas;
+use App\Exceptions\FileStorageFailed;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
@@ -147,8 +148,20 @@ class UpdatePageContent
         }
 
         if (($newValue['file'] ?? null) instanceof UploadedFile) {
-            $this->deletePaths([$currentPath]);
+            // Ordre critique : écrire la nouvelle image AVANT de supprimer l'ancienne.
+            // L'ordre inverse (celui d'origine) faisait perdre l'illustration existante dès
+            // que l'écriture échouait — et comme le disque est en `throw => false`,
+            // `store()` renvoie `false` sans rien signaler : le `false` était enregistré
+            // comme chemin, l'ancienne image était déjà effacée, et rien n'apparaissait dans
+            // le journal. Cas typique en production sur hébergement mutualisé (droits
+            // d'écriture, quota).
             $newPath = $newValue['file']->store($storagePath, 'public');
+
+            if (! is_string($newPath) || $newPath === '') {
+                throw FileStorageFailed::for($newValue['file'], $storagePath);
+            }
+
+            $this->deletePaths([$currentPath]);
 
             return ['path' => $newPath, 'alt' => $alt];
         }

@@ -44,7 +44,15 @@ return [
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
-            'report' => false,
+            // `report` à true : c'est le disque qui reçoit TOUS les fichiers envoyés depuis
+            // l'admin (images de contenu, couvertures d'article, photos d'adhérent). Avec
+            // `report => false`, un échec d'écriture — dossier storage/app/public non
+            // inscriptible, quota d'hébergement atteint — ne laissait AUCUNE trace dans
+            // storage/logs/laravel.log : l'upload échouait en silence et il n'y avait
+            // littéralement rien à lire pour comprendre. On garde `throw => false` (le code
+            // appelant teste lui-même le retour de `store()`, cf. les Actions) mais on veut
+            // l'exception dans le journal.
+            'report' => true,
         ],
 
         's3' => [
