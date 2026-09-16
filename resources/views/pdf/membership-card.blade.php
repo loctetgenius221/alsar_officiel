@@ -1,3 +1,20 @@
+@php
+    use App\Support\PdfAsset;
+
+    // Fichiers résolus UNE fois puis embarqués en base64 (cf. App\Support\PdfAsset) :
+    // référencés par un chemin de fichier, dompdf refusait de les ouvrir en production alors
+    // que la photo et le QR — déjà des data URI — s'affichaient sur la même page. Un `null`
+    // signifie fichier introuvable : on n'émet alors pas la balise, plutôt que de laisser
+    // dompdf dessiner sa croix grise.
+    $bgFront = PdfAsset::dataUri('images/card-bg-front.png');
+    $bgBack = PdfAsset::dataUri('images/card-bg-back.png');
+    $logo = PdfAsset::dataUri('images/logo-alsar.png');
+
+    // Exception : une police ne peut PAS être embarquée en data URI, dompdf ne sachant charger
+    // un @font-face que depuis un chemin ou une URL. Introuvable, on retombe sur DejaVu Sans
+    // (embarquée dans dompdf) : la carte reste lisible, seulement moins fidèle.
+    $antonPath = PdfAsset::path('fonts/Anton-Regular.ttf');
+@endphp
 <!DOCTYPE html>
 <html lang="fr">
     <head>
@@ -29,12 +46,14 @@
              * - Les abscisses (départ des filets, centrage de l'en-tête du verso) sont calées sur
              *   des largeurs de texte MESURÉES via Dompdf\FontMetrics, pas estimées à l'œil.
              */
+            @if ($antonPath)
             @font-face {
                 font-family: 'Anton';
                 font-style: normal;
                 font-weight: normal;
-                src: url('{{ public_path('fonts/Anton-Regular.ttf') }}') format('truetype');
+                src: url('{{ $antonPath }}') format('truetype');
             }
+            @endif
 
             @page {
                 margin: 0;
@@ -307,9 +326,13 @@
     <body>
         {{-- ======================= RECTO ======================= --}}
         <div class="card">
-            <img class="bg" src="{{ public_path('images/card-bg-front.png') }}" alt="" />
+            @if ($bgFront)
+                <img class="bg" src="{{ $bgFront }}" alt="" />
+            @endif
 
-            <img class="header-logo" src="{{ public_path('images/logo-alsar.png') }}" alt="" />
+            @if ($logo)
+                <img class="header-logo" src="{{ $logo }}" alt="" />
+            @endif
 
             <p class="line display party-name header-title l1">Alliance pour la synergie des</p>
             <p class="line display party-name header-title l2">Actions républicaines (ALSAR)</p>
@@ -333,15 +356,19 @@
             <img class="qr" src="{{ $qrCode }}" alt="QR de vérification" />
             @if ($qrWithLogo ?? false)
                 <div class="qr-logo-bg"></div>
-                <img class="qr-logo" src="{{ public_path('images/logo-alsar.png') }}" alt="" />
+                <img class="qr-logo" src="{{ $logo }}" alt="" />
             @endif
         </div>
 
         {{-- ======================= VERSO ======================= --}}
         <div class="card">
-            <img class="bg" src="{{ public_path('images/card-bg-back.png') }}" alt="" />
+            @if ($bgBack)
+                <img class="bg" src="{{ $bgBack }}" alt="" />
+            @endif
 
-            <img class="header-logo" src="{{ public_path('images/logo-alsar.png') }}" alt="" />
+            @if ($logo)
+                <img class="header-logo" src="{{ $logo }}" alt="" />
+            @endif
 
             <p class="line display party-name header-title l1">Alliance pour la synergie des</p>
             <p class="line display party-name header-title l2">Actions républicaines (ALSAR)</p>
