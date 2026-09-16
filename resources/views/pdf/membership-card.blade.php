@@ -4,31 +4,38 @@
         <meta charset="utf-8" />
         <style>
             /*
-             * Format carte bancaire ISO/IEC 7810 ID-1 (85,60 x 53,98 mm) — la seule taille
-             * qu'un adhérent peut réellement imprimer, découper et glisser dans un
-             * portefeuille.
+             * Carte de membre ALSAR — format ISO/IEC 7810 ID-1 (85,60 x 53,98 mm).
              *
-             * Refonte 2026 (v2, retour utilisateur) : fond clair recto ET verso (l'aplat encre
-             * du premier jet a été jugé trop sombre) ; le filet or plein cadre en bord gauche
-             * est retiré (jugé trop présent) et remplacé par un motif de "vagues" superposées
-             * (3 cercles de couleurs et opacités différentes, cf. `.wave-*`) posé en bas de
-             * carte — signature de marque plus douce, partagée recto/verso, qui comble aussi
-             * le vide en bas du verso plutôt que de laisser un aplat blanc après le tableau des
-             * champs. Un seul wrapper `.content` porte le padding intérieur (recto et verso en
-             * manquaient totalement — le contenu touchait presque les bords).
+             * Refonte v5 : maquette imprimeur (fond gris très clair, vagues jaunes montant vers
+             * la droite, titre condensé, photo en bas à gauche, QR dans un cadre jaune), avec les
+             * proportions revues à la demande du client — photo, logo, titre d'en-tête, titre
+             * « Carte de membre » et numéro réduits ; en-tête du verso centré et identique à
+             * celui du recto ; valeurs du verso alignées sur une colonne commune.
              *
-             * Contraintes dompdf déjà éprouvées sur ce gabarit :
-             * - Pas de dégradé CSS (`linear-gradient` etc.) : ne se rend pas.
-             * - `<table>` qui suit un frère en `position:absolute` a besoin de son propre
-             *   `position:relative` explicite, sinon dompdf la mal-positionne.
-             * - Cercles/formes : `border-radius: 50%` sur un carré fonctionne, testé et vérifié
-             *   par rendu réel (voir les vagues ci-dessous).
-             * - Photo adhérent : `object-fit: cover` sur un <img> s'est révélé encore étirer
-             *   la photo pour certains fichiers (rendu incohérent selon le format/les
-             *   dimensions source — support object-fit de dompdf récent et incomplet).
-             *   Recadrage fiable obtenu via `background-image` + `background-size: cover` sur
-             *   le cadre lui-même (chemin de rendu plus ancien et mieux supporté par dompdf).
+             * Choix techniques (contraintes dompdf) :
+             * - Les vagues sont des PNG 300 dpi (public/images/card-bg-front.png / -back.png)
+             *   posés en plein cadre : dompdf ne rend ni dégradé CSS ni courbe libre, et un
+             *   raster à la taille EXACTE de la carte ne peut pas créer de page fantôme.
+             * - Tout est en position:absolute à l'intérieur de .card (aucun élément ne dépasse
+             *   verticalement la carte).
+             * - Police titre : Anton (SIL OFL, public/fonts/Anton-Regular.ttf, licence dans
+             *   public/fonts/Anton-OFL.txt). Repli sur DejaVu Sans (embarquée dans dompdf) si le
+             *   fichier manque — la carte reste lisible, seulement moins fidèle.
+             *   dompdf met en cache les métriques dans storage/fonts : ce dossier DOIT exister et
+             *   être inscriptible, sinon la génération échoue.
+             * - Photo : cadre à taille fixe + image à hauteur fixe centrée dans un conteneur
+             *   très large (marge négative) → recadrage centré sans object-fit ni
+             *   background-size, tous deux peu fiables dans dompdf.
+             * - Les abscisses (départ des filets, centrage de l'en-tête du verso) sont calées sur
+             *   des largeurs de texte MESURÉES via Dompdf\FontMetrics, pas estimées à l'œil.
              */
+            @font-face {
+                font-family: 'Anton';
+                font-style: normal;
+                font-weight: normal;
+                src: url('{{ public_path('fonts/Anton-Regular.ttf') }}') format('truetype');
+            }
+
             @page {
                 margin: 0;
                 size: 85.6mm 53.98mm;
@@ -41,8 +48,12 @@
             body {
                 margin: 0;
                 padding: 0;
-                font-family: sans-serif;
-                color: #0e1a2b;
+                font-family: 'DejaVu Sans', sans-serif;
+                color: #14233a;
+            }
+
+            p {
+                margin: 0;
             }
 
             .card {
@@ -59,378 +70,320 @@
 
             .bg {
                 position: absolute;
-                inset: 0;
-                background-color: #faf7f1;
+                top: 0;
+                left: 0;
+                width: 85.6mm;
+                height: 53.98mm;
             }
 
-            /* Vagues superposées — signature de marque commune recto/verso, posée en bas de
-               carte. Chaque vague est une boîte ENTIÈREMENT contenue dans ses propres
-               dimensions (bottom: 0, jamais de décalage négatif) : sur un rectangle large et
-               bas, un rayon de coin à 50% donne un arc très aplati (silhouette de colline)
-               sans qu'aucun élément ne déborde verticalement de la carte. Un premier essai
-               avec de grands cercles décalés en `bottom` négatif (pour ne montrer qu'une
-               calotte) a fait ajouter des pages fantômes par dompdf — il ne respecte pas
-               `overflow:hidden` pour son calcul de pagination, seulement pour l'affichage. Ne
-               jamais réintroduire un élément dont la boîte dépasse la carte verticalement. */
-            .wave {
+            .display {
+                font-family: 'Anton', 'DejaVu Sans', sans-serif;
+                font-weight: normal;
+                text-transform: uppercase;
+            }
+
+            /* dompdf calcule la hauteur de ligne sur la boîte englobante de la police (très
+               haute pour Anton) et ignore line-height : chaque ligne est donc placée à sa
+               propre coordonnée verticale. */
+            .line {
                 position: absolute;
-                bottom: 0;
-                border-radius: 50% 50% 0 0;
+                white-space: nowrap;
+                line-height: 1;
             }
 
-            .wave-1 {
-                left: -6mm;
-                width: 92mm;
-                height: 17mm;
-                background-color: #e6ddcc;
-            }
-
-            .wave-2 {
-                left: 19mm;
-                width: 58mm;
-                height: 12mm;
-                background-color: #dcb466;
-                opacity: 0.55;
-            }
-
-            .wave-3 {
-                left: 53mm;
-                width: 36mm;
-                height: 7.5mm;
-                background-color: #c47a52;
-                opacity: 0.45;
-            }
-
-            /* Verso : vagues plus discrètes (2 collines, pas 3) pour ne pas concurrencer le
-               tableau de champs — juste assez pour combler le bas de carte sans le charger. */
-            .wave-back-1 {
-                left: -4mm;
-                width: 80mm;
-                height: 13mm;
-                background-color: #f2ede2;
-            }
-
-            .wave-back-2 {
-                left: 44mm;
-                width: 44mm;
-                height: 8mm;
-                background-color: #dcb466;
-                opacity: 0.35;
-            }
-
-            /* Contenu : porte tout le padding intérieur (absent avant, contenu au ras des
-               bords) — les vagues et le fond restent en plein cadre derrière lui. */
-            .content {
-                position: relative;
-                padding: 3.4mm 3.6mm;
-            }
-
-            /* Recto */
-            .header-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .header-table td {
-                vertical-align: middle;
-            }
-
-            .header-table .logo-cell {
-                width: 9mm;
-            }
-
-            .header-table .logo-cell img {
-                width: 8mm;
-            }
-
-            .brand-cell {
-                padding-left: 2.4mm;
-            }
-
+            /* Bloc titre commun au recto et au verso (« reprendre le même titre ») : même
+               contenu, mêmes corps, mêmes coordonnées — cf. les règles .header-* plus bas. */
             .party-name {
-                font-size: 6.4px;
-                font-weight: bold;
-                letter-spacing: 0.3px;
-                line-height: 1.35;
-                color: #0e1a2b;
-                margin: 0;
-            }
-
-            .tagline {
-                font-size: 5px;
-                font-weight: bold;
-                letter-spacing: 1.4px;
-                text-transform: uppercase;
-                color: #8f6720;
-                margin: 1mm 0 0;
-            }
-
-            .rule {
-                margin: 2.2mm 0 0;
-                border-top: 0.25mm solid #d3c5ac;
-            }
-
-            .body-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            .body-table td {
-                vertical-align: top;
-                padding-top: 2.8mm;
-            }
-
-            .photo-cell {
-                width: 19mm;
-            }
-
-            .photo-frame {
-                width: 16mm;
-                height: 20mm;
-                background-color: #e6ddcc;
-                border: 0.4mm solid #d3c5ac;
-                border-radius: 0.8mm;
-                overflow: hidden;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            /* Recadrage par hauteur fixe + largeur auto (garde les proportions natives de la
-               photo) et débordement horizontal coupé par le cadre — ni object-fit ni
-               background-size, les deux s'étant révélés peu fiables selon la photo source. */
-            .photo-frame img {
-                height: 20mm;
-                width: auto;
-                max-width: none;
-                flex-shrink: 0;
-            }
-
-            .info-cell {
-                padding-left: 2.4mm;
-                padding-right: 1.5mm;
-            }
-
-            .eyebrow {
-                font-size: 5.2px;
-                font-weight: bold;
-                letter-spacing: 1.4px;
-                text-transform: uppercase;
-                color: #8f6720;
-                margin: 0;
-            }
-
-            .member-name {
-                font-family: Georgia, 'Times New Roman', serif;
-                font-size: 11px;
-                font-weight: bold;
-                line-height: 1.2;
-                color: #0e1a2b;
-                margin: 1.4mm 0 0;
-            }
-
-            .member-code {
-                font-family: 'Courier New', monospace;
-                font-size: 6.6px;
-                letter-spacing: 0.8px;
-                color: #b8863a;
-                margin: 2mm 0 0;
-            }
-
-            .qr-cell {
-                width: 17mm;
+                font-size: 9.6pt;
+                letter-spacing: 0.1pt;
+                color: #2b3038;
                 text-align: center;
             }
 
-            .qr-frame {
-                background-color: #faf7f1;
-                border: 0.25mm solid #e6ddcc;
-                padding: 0.8mm;
-                border-radius: 0.6mm;
-                display: inline-block;
+            .tagline {
+                text-align: center;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 6.2pt;
+                letter-spacing: 0.35pt;
+                color: #3a4048;
             }
 
-            .qr-cell img {
-                width: 12.5mm;
-                height: 12.5mm;
+            /* En-tête, identique et centré sur les deux faces : le groupe logo (12 mm) +
+               gouttière (2 mm) + bloc titre (41 mm) fait 55 mm, d'où une marge de
+               (85,6 - 55) / 2 = 15,3 mm de chaque côté. Les trois lignes du bloc tiennent dans
+               41 mm (largeurs mesurées : 40,61 / 40,58 / 39,50 mm), le centrage est donc exact. */
+            .header-logo {
+                position: absolute;
+                top: 1.8mm;
+                left: 15.3mm;
+                width: 12mm;
             }
 
-            .qr-caption {
-                font-size: 4.1px;
-                letter-spacing: 0.3px;
-                color: #8f7d64;
-                margin: 0.9mm 0 0;
+            .header-title {
+                left: 29.3mm;
+                width: 41mm;
             }
 
-            /* Verso */
-            .back-header-table {
-                width: 100%;
-                border-collapse: collapse;
+            .header-title.l1 {
+                top: 2.2mm;
             }
 
-            .back-header-table td {
-                vertical-align: middle;
+            .header-title.l2 {
+                top: 6.4mm;
             }
 
-            .back-header-table .logo-cell {
-                width: 8mm;
+            .header-tagline {
+                top: 11.6mm;
+                left: 29.3mm;
+                width: 41mm;
             }
 
-            .back-header-table .logo-cell img {
-                width: 6.5mm;
+            /* ============ RECTO ============ */
+
+            /* Centrés sur la LARGEUR TOTALE de la carte (et non sur l'espace restant à droite
+               de la photo) : `left: 0; right: 0` aligne l'axe du texte sur celui de la carte. */
+            .card-title {
+                top: 15.2mm;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 16pt;
+                letter-spacing: 0.2pt;
+                color: #0d0d0d;
             }
 
-            .movement-name {
-                font-size: 5.8px;
+            .card-code {
+                top: 24.2mm;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 8.6pt;
                 font-weight: bold;
-                letter-spacing: 1px;
-                text-transform: uppercase;
-                color: #8f6720;
-                padding-left: 2.2mm;
+                letter-spacing: 0.3pt;
+                color: #0d0d0d;
             }
 
-            .fields-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 1.8mm;
+            /* Photo encadrée comme le QR (liseré jaune + réserve blanche). Le bord BAS reste
+               calé sur celui du QR (50 mm) : la réduction se fait donc vers le haut, ce qui
+               préserve la respiration en pied de carte et dégage en prime le titre « Carte de
+               membre » (1,6 mm entre le cadre et le « C », contre 0,9 mm auparavant).
+               Épaisseurs reprises du QR : 1,05 mm de jaune, puis 0,6 mm de blanc.
+               Image utile 15,7 x 19,7 mm, soit une proportion portrait proche du 4:5. */
+            .photo-yellow {
+                position: absolute;
+                left: 2.8mm;
+                top: 27mm;
+                width: 19mm;
+                height: 23mm;
+                background-color: #f2d62a;
             }
 
-            .fields-table td {
-                vertical-align: bottom;
-                line-height: 1;
-                padding: 1.5mm 0 1.5mm;
-                border-bottom: 0.25mm solid #d3c5ac;
+            .photo-white {
+                position: absolute;
+                left: 3.85mm;
+                top: 28.05mm;
+                width: 16.9mm;
+                height: 20.9mm;
+                background-color: #ffffff;
             }
 
-            .fields-table tr:last-child td {
-                border-bottom: none;
+            .photo-frame {
+                position: absolute;
+                left: 4.45mm;
+                top: 28.65mm;
+                width: 15.7mm;
+                height: 19.7mm;
+                overflow: hidden;
+            }
+
+            /* Conteneur 80 mm centré sur le cadre : l'image (hauteur fixe, largeur
+               proportionnelle) est centrée dedans, le cadre coupe le surplus des deux côtés.
+               Marge = -(80 - 15,7) / 2. */
+            .photo-strip {
+                width: 80mm;
+                margin-left: -32.15mm;
+                text-align: center;
+                line-height: 0;
+            }
+
+            .photo-strip img {
+                height: 19.7mm;
+                width: auto;
+            }
+
+            /* QR dans un cadre jaune, en bas à droite (boîtes absolues indépendantes :
+               dompdf place mal une boîte imbriquée dans un parent à padding). */
+            .qr-yellow {
+                position: absolute;
+                left: 67.3mm;
+                top: 34.5mm;
+                width: 15.5mm;
+                height: 15.5mm;
+                background-color: #f2d62a;
+            }
+
+            .qr-white {
+                position: absolute;
+                left: 68.35mm;
+                top: 35.55mm;
+                width: 13.4mm;
+                height: 13.4mm;
+                background-color: #ffffff;
+            }
+
+            .qr {
+                position: absolute;
+                left: 68.95mm;
+                top: 36.15mm;
+                width: 12.2mm;
+                height: 12.2mm;
+            }
+
+            /* Petit logo au centre du QR : n'activer ($qrWithLogo) que si le QR est généré
+               avec la correction d'erreur H, sinon il devient illisible. */
+            .qr-logo-bg {
+                position: absolute;
+                left: 73.3mm;
+                top: 40.5mm;
+                width: 3.5mm;
+                height: 3.5mm;
+                background-color: #ffffff;
+            }
+
+            .qr-logo {
+                position: absolute;
+                left: 73.55mm;
+                top: 40.75mm;
+                width: 3mm;
+            }
+
+            /* ============ VERSO ============ */
+            /* Lignes à remplir : 7 rangées. Le filet part juste après son libellé (comme sur la
+               maquette) ; les valeurs, elles, démarrent toutes à la même abscisse pour former une
+               colonne alignée. */
+            .rule {
+                position: absolute;
+                right: 2.8mm;
+                height: 0;
+                border-top: 0.32mm solid #14233a;
+            }
+
+            .field {
+                left: 3mm;
+                right: 2.8mm;
+                overflow: hidden;
             }
 
             .f-label {
-                width: 19mm;
-                font-size: 5.5px;
-                font-weight: bold;
-                letter-spacing: 1px;
-                text-transform: uppercase;
-                color: #8f6720;
-            }
-
-            .f-value {
-                font-size: 9px;
-                color: #0e1a2b;
-                padding-left: 2mm;
-            }
-
-            .verify-footer {
                 position: absolute;
-                left: 3.6mm;
-                right: 3.6mm;
-                bottom: 3mm;
-                font-size: 4.6px;
-                color: #6e5f4a;
+                left: 3mm;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 7.2pt;
+                font-weight: bold;
+                color: #14233a;
+            }
+
+            /* Helvetica comme le libellé (et non DejaVu) : deux polices dans la même ligne
+               donnent à dompdf une boîte de ligne bâtarde, et le filet tombait alors au milieu
+               du texte au lieu de la ligne de base. Helvetica couvre les accents français. */
+            /* Valeurs alignées à droite : toutes se terminent sur la même verticale, au ras
+               de la marge. `left: 22mm` (et non 41 mm, après le libellé le plus long) laisse
+               60 mm utiles au lieu de 41 — de quoi loger une adresse sénégalaise complète sans
+               la tronquer. Seul « NUMÉRO D'IDENTIFICATION : » s'étend jusqu'à 39,4 mm, mais ses
+               valeurs sont des numéros courts : aucun recouvrement en pratique. */
+            .f-value {
+                position: absolute;
+                left: 22mm;
+                right: 3.4mm;
+                text-align: right;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 7.2pt;
+                color: #0e1a2b;
+                overflow: hidden;
             }
         </style>
     </head>
     <body>
-        {{-- Recto --}}
+        {{-- ======================= RECTO ======================= --}}
         <div class="card">
-            <div class="bg"></div>
-            <div class="wave wave-1"></div>
-            <div class="wave wave-2"></div>
-            <div class="wave wave-3"></div>
+            <img class="bg" src="{{ public_path('images/card-bg-front.png') }}" alt="" />
 
-            <div class="content">
-                <table class="header-table">
-                    <tr>
-                        <td class="logo-cell">
-                            <img src="{{ public_path('images/logo-alsar.png') }}" />
-                        </td>
-                        <td class="brand-cell">
-                            <p class="party-name">ALLIANCE POUR LA SYNERGIE DES ACTIONS RÉPUBLICAINES</p>
-                            <p class="tagline">Action &bull; Engagement &bull; Solidarité</p>
-                        </td>
-                    </tr>
-                </table>
+            <img class="header-logo" src="{{ public_path('images/logo-alsar.png') }}" alt="" />
 
-                <div class="rule"></div>
+            <p class="line display party-name header-title l1">Alliance pour la synergie des</p>
+            <p class="line display party-name header-title l2">Actions républicaines (ALSAR)</p>
+            <p class="line tagline header-tagline">ACTION-ENGAGEMENT-SOLIDARITÉ</p>
 
-                <table class="body-table">
-                    <tr>
-                        <td class="photo-cell">
-                            <div class="photo-frame">
-                                @if ($photo)
-                                    <img src="{{ $photo }}" alt="" />
-                                @endif
-                            </div>
-                        </td>
-                        <td class="info-cell">
-                            <p class="eyebrow">Carte de membre</p>
-                            <p class="member-name">
-                                {{ $member->first_name }}<br />{{ mb_strtoupper($member->last_name) }}
-                            </p>
-                            <p class="member-code">N&deg; {{ $member->membership_code }}</p>
-                        </td>
-                        <td class="qr-cell">
-                            <div class="qr-frame">
-                                <img src="{{ $qrCode }}" alt="QR de vérification" />
-                            </div>
-                            <p class="qr-caption">Scanner pour vérifier</p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+            <p class="line display card-title">Carte de membre</p>
+            <p class="line card-code">N&deg; {{ $member->membership_code }}</p>
+
+            {{-- Les trois boîtes du cadre sont sous le @if : sans photo, un rectangle jaune
+                 vide resterait affiché en bas à gauche. --}}
+            @if ($photo)
+                <div class="photo-yellow"></div>
+                <div class="photo-white"></div>
+                <div class="photo-frame">
+                    <div class="photo-strip"><img src="{{ $photo }}" alt="" /></div>
+                </div>
+            @endif
+
+            <div class="qr-yellow"></div>
+            <div class="qr-white"></div>
+            <img class="qr" src="{{ $qrCode }}" alt="QR de vérification" />
+            @if ($qrWithLogo ?? false)
+                <div class="qr-logo-bg"></div>
+                <img class="qr-logo" src="{{ public_path('images/logo-alsar.png') }}" alt="" />
+            @endif
         </div>
 
-        {{-- Verso --}}
+        {{-- ======================= VERSO ======================= --}}
         <div class="card">
-            <div class="bg"></div>
-            <div class="wave wave-back-1"></div>
-            <div class="wave wave-back-2"></div>
+            <img class="bg" src="{{ public_path('images/card-bg-back.png') }}" alt="" />
 
-            <div class="content">
-                <table class="back-header-table">
-                    <tr>
-                        <td class="logo-cell">
-                            <img src="{{ public_path('images/logo-alsar.png') }}" />
-                        </td>
-                        <td class="movement-name">Parti politique sénégalais</td>
-                    </tr>
-                </table>
+            <img class="header-logo" src="{{ public_path('images/logo-alsar.png') }}" alt="" />
 
-                <table class="fields-table">
-                    <tr>
-                        <td class="f-label">Nom</td>
-                        <td class="f-value">{{ $member->last_name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="f-label">Prénom</td>
-                        <td class="f-value">{{ $member->first_name }}</td>
-                    </tr>
-                    <tr>
-                        <td class="f-label">Profession</td>
-                        <td class="f-value">{{ $member->profession ?? '—' }}</td>
-                    </tr>
-                    <tr>
-                        <td class="f-label">Téléphone</td>
-                        <td class="f-value">{{ $member->phone }}</td>
-                    </tr>
-                    <tr>
-                        <td class="f-label">Adresse</td>
-                        <td class="f-value">{{ $member->address ?? '—' }}</td>
-                    </tr>
-                    @if ($member->id_document_number)
-                        <tr>
-                            <td class="f-label">N&deg; pièce</td>
-                            <td class="f-value">{{ $member->id_document_number }}</td>
-                        </tr>
-                    @endif
-                </table>
+            <p class="line display party-name header-title l1">Alliance pour la synergie des</p>
+            <p class="line display party-name header-title l2">Actions républicaines (ALSAR)</p>
+            <p class="line tagline header-tagline">ACTION-ENGAGEMENT-SOLIDARITÉ</p>
 
-                {{-- Domaine public fixe (pas route()/APP_URL) : la carte doit toujours afficher
-                     le vrai domaine de production, pas l'hôte de l'environnement où elle est
-                     générée (local, staging...). --}}
-                <p class="verify-footer">Vérifiable sur alsar.sn/verifier/{{ $member->membership_code }}</p>
-            </div>
+            @php
+                // Libellé, valeur, et abscisse de départ du filet = 3 mm (marge) + largeur du
+                // libellé MESURÉE en Helvetica gras 7,2 pt + 1,2 mm de respiration.
+                // `cellule` n'existe pas sur Member : la ligne reste vide, à remplir à la main.
+                $rows = [
+                    ['NOM :', mb_strtoupper($member->last_name ?? ''), 11.7],
+                    ['PRÉNOM :', $member->first_name ?? '', 16.9],
+                    ['PROFESSION :', $member->profession ?? '', 22.4],
+                    ['CELLULE', $member->cellule ?? '', 15.9],
+                    ['ADRESSE :', $member->address ?? '', 18.0],
+                    ['TÉLÉPHONE :', $member->phone ?? '', 21.3],
+                    ['NUMÉRO D’IDENTIFICATION :', $member->id_document_number ?? '', 40.6],
+                ];
+                $firstTop = 16.4;
+                $pitch = 5.1;
+                // Décalage du filet sous le haut de la rangée, calé sur la ligne de base des
+                // glyphes. Valeur propre à une ligne 100 % Helvetica 7,2 pt : mélanger deux
+                // polices dans la même ligne rendrait la boîte plus haute et décalerait le trait.
+                $ruleDrop = 2.5;
+            @endphp
+
+            @foreach ($rows as $i => [$label, $value, $ruleLeft])
+                @php
+                    $top = $firstTop + $i * $pitch;
+                    // Les valeurs disposent de 60,2 mm (85,6 - 22 - 3,4). Au-delà,
+                    // `overflow: hidden` trancherait net au milieu d'une lettre : on coupe donc
+                    // sur la largeur RÉELLE du texte, pas sur un nombre de caractères (cf.
+                    // App\Support\PdfText).
+                    $value = \App\Support\PdfText::fit($value, 60.2, 7.2);
+                @endphp
+                <p class="line f-label" style="top: {{ number_format($top, 2) }}mm">{{ $label }}</p>
+                <p class="line f-value" style="top: {{ number_format($top, 2) }}mm">{{ $value }}</p>
+                <div
+                    class="rule"
+                    style="top: {{ number_format($top + $ruleDrop, 2) }}mm; left: {{ number_format($ruleLeft, 1) }}mm"
+                ></div>
+            @endforeach
         </div>
     </body>
 </html>

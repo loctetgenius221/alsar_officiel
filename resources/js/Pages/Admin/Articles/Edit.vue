@@ -9,6 +9,7 @@ import FormErrorSummary from '@/Components/ui/FormErrorSummary.vue';
 import { articleStatus } from '@/lib/status';
 import { ARTICLE_FIELD_LABELS } from '@/lib/field-labels';
 import { focusFirstError } from '@/lib/form-errors';
+import { patchWithFiles } from '@/lib/inertia-upload';
 import { confirmAction } from '@/lib/confirm';
 import { useUnsavedChanges } from '@/Composables/useUnsavedChanges';
 import { SquareArrowOutUpRight, Trash2 } from '@lucide/vue';
@@ -51,7 +52,9 @@ const isDirty = computed(() => form.isDirty);
 const { allowLeave } = useUnsavedChanges(isDirty);
 
 function submit() {
-    form.patch(`/admin/actualites/${props.article.id}`, {
+    // Même contrainte que l'éditeur de contenu : une couverture envoyée sur un PATCH multipart
+    // n'arrive jamais jusqu'à PHP (cf. lib/inertia-upload.ts).
+    patchWithFiles(form, `/admin/actualites/${props.article.id}`, {
         preserveScroll: true,
         // Le succès est annoncé par le message flashé du serveur (qui précise si l'article est
         // en ligne, en brouillon ou programmé) ; cf. lib/inertia-feedback.ts.

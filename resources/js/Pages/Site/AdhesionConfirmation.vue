@@ -44,7 +44,7 @@ useScrollReveal(panelRef, { y: 16, duration: 0.7 });
         </template>
 
         <template v-else-if="member.status === 'active'">
-            <div ref="panelRef" class="border border-sand-300 bg-paper p-8 sm:p-12">
+            <div ref="panelRef" class="mt-8 border border-sand-300 bg-paper p-8 sm:p-12">
                 <div class="flex items-center gap-2 text-gold-600">
                     <CheckCircle2 class="size-5" aria-hidden="true" />
                     <p class="font-sans text-xs font-semibold tracking-wide uppercase">Adhésion confirmée</p>
@@ -55,11 +55,18 @@ useScrollReveal(panelRef, { y: 16, duration: 0.7 });
                 <p class="mt-4 font-display text-display-2 text-ink">{{ member.fullName }}</p>
                 <p class="mt-2 font-sans text-sm text-ink-soft">
                     Code d'adhésion <span class="font-medium text-ink">{{ member.membershipCode }}</span>
-                    <template v-if="member.joinedAt"> &middot; Membre depuis le {{ member.joinedAt }}</template>
+                    <template v-if="member.joinedAt">
+                        &middot; Membre depuis le {{ member.joinedAt }}</template
+                    >
                 </p>
 
-                <div class="mt-10 flex flex-col gap-8 border-t border-sand-200 pt-8 sm:flex-row sm:items-center">
-                    <div v-if="qrCode" class="inline-block shrink-0 self-start border border-sand-200 bg-paper-dim p-3">
+                <div
+                    class="mt-10 flex flex-col gap-8 border-t border-sand-200 pt-8 sm:flex-row sm:items-center"
+                >
+                    <div
+                        v-if="qrCode"
+                        class="inline-block shrink-0 self-start border border-sand-200 bg-paper-dim p-3"
+                    >
                         <img :src="qrCode" alt="QR code de vérification de l'adhésion" class="size-32" />
                     </div>
 

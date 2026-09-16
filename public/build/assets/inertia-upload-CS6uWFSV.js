@@ -1,0 +1,1 @@
+function e(t){return typeof File<`u`&&t instanceof File||typeof Blob<`u`&&t instanceof Blob?!0:Array.isArray(t)?t.some(e):typeof t==`object`&&t?Object.values(t).some(e):!1}function t(t,n,r){if(!e(t.data())){t.transform(e=>e).patch(n,r);return}t.transform(e=>({...e,_method:`patch`})).post(n,r)}export{t};

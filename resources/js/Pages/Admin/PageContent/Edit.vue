@@ -18,6 +18,7 @@ import { prepareFormSections, type PageSchema } from '@/lib/page-content-schema'
 import { ICON_NAMES } from '@/lib/icon-registry';
 import { sectionFieldLabels } from '@/lib/field-labels';
 import { focusFirstError } from '@/lib/form-errors';
+import { patchWithFiles } from '@/lib/inertia-upload';
 import { useUnsavedChanges } from '@/Composables/useUnsavedChanges';
 
 defineOptions({ layout: AdminLayout });
@@ -57,7 +58,10 @@ useUnsavedChanges(isDirty, {
 const fieldLabels = computed(() => sectionFieldLabels(props.schema));
 
 function submit() {
-    form.patch(`/admin/contenu-des-pages/${props.page.slug}`, {
+    // `patchWithFiles` et non `form.patch` : PHP ne décode pas un corps multipart sur un verbe
+    // PATCH, un enregistrement contenant une image arrivait donc vide côté serveur (cf.
+    // lib/inertia-upload.ts pour le détail).
+    patchWithFiles(form, `/admin/contenu-des-pages/${props.page.slug}`, {
         preserveScroll: true,
         // Remet le repère « non enregistré » à zéro : sans ça, la page resterait marquée
         // modifiée juste après un enregistrement réussi.

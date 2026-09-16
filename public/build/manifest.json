@@ -176,6 +176,10 @@
       "_video-Dm8HAG7S.js"
     ]
   },
+  "_inertia-upload-CS6uWFSV.js": {
+    "file": "assets/inertia-upload-CS6uWFSV.js",
+    "name": "inertia-upload"
+  },
   "_map-pin-DLWJOJO0.js": {
     "file": "assets/map-pin-DLWJOJO0.js",
     "name": "map-pin",
@@ -336,7 +340,7 @@
     "src": "public/images/pattern-baobab.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CWLSPF6_.css",
+    "file": "assets/app-BzhP8oBd.css",
     "name": "app",
     "names": [
       "app.css"
@@ -383,7 +387,7 @@
     ]
   },
   "resources/js/Pages/Admin/Articles/Edit.vue": {
-    "file": "assets/Edit-BXlDWzum.js",
+    "file": "assets/Edit-DXfkI2z-.js",
     "name": "Edit",
     "src": "resources/js/Pages/Admin/Articles/Edit.vue",
     "isDynamicEntry": true,
@@ -397,7 +401,8 @@
       "_ArticleForm-FsES-tFk.js",
       "_Button-Dega1Id5.js",
       "_field-labels-jnniTt3E.js",
-      "_status-Mh1kV1-g.js"
+      "_status-Mh1kV1-g.js",
+      "_inertia-upload-CS6uWFSV.js"
     ]
   },
   "resources/js/Pages/Admin/Articles/Index.vue": {
@@ -468,7 +473,7 @@
     ]
   },
   "resources/js/Pages/Admin/PageContent/Edit.vue": {
-    "file": "assets/Edit-Ct-o7han.js",
+    "file": "assets/Edit-bwp695Bm.js",
     "name": "Edit",
     "src": "resources/js/Pages/Admin/PageContent/Edit.vue",
     "isDynamicEntry": true,
@@ -481,7 +486,8 @@
       "_Input-D_nF4UXn.js",
       "_Select-BFDwT2gb.js",
       "_Button-Dega1Id5.js",
-      "_field-labels-jnniTt3E.js"
+      "_field-labels-jnniTt3E.js",
+      "_inertia-upload-CS6uWFSV.js"
     ]
   },
   "resources/js/Pages/Admin/PageContent/Index.vue": {
@@ -548,7 +554,7 @@
     ]
   },
   "resources/js/Pages/Site/AdhesionConfirmation.vue": {
-    "file": "assets/AdhesionConfirmation-BEcD6kZ_.js",
+    "file": "assets/AdhesionConfirmation-DsALfBEl.js",
     "name": "AdhesionConfirmation",
     "src": "resources/js/Pages/Site/AdhesionConfirmation.vue",
     "isDynamicEntry": true,
@@ -690,7 +696,7 @@
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-CfnZHjxX.js",
+    "file": "assets/app-BTvDtPN4.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -732,7 +738,7 @@
       "resources/js/Pages/Site/Verifier.vue"
     ],
     "css": [
-      "assets/app-CWLSPF6_.css"
+      "assets/app-BzhP8oBd.css"
     ],
     "assets": [
       "assets/fraunces-vietnamese-standard-normal-Czevyj-6.woff2",
