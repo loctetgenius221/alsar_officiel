@@ -7,12 +7,13 @@ import { Head, router, setLayoutProps } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Card from '@/Components/ui/Card.vue';
-import Badge from '@/Components/ui/Badge.vue';
 import Select from '@/Components/ui/Select.vue';
 import Button from '@/Components/ui/Button.vue';
+import EmptyState from '@/Components/ui/EmptyState.vue';
+import StatusBadge from '@/Components/admin/StatusBadge.vue';
 import Pagination from '@/Components/admin/Pagination.vue';
-import { paymentStatus } from '@/lib/status';
 import { confirmAction } from '@/lib/confirm';
+import { Check, Wallet } from '@lucide/vue';
 
 defineOptions({ layout: AdminLayout });
 setLayoutProps({ title: 'Paiements' });
@@ -20,7 +21,8 @@ setLayoutProps({ title: 'Paiements' });
 const props = defineProps<{
     payments: {
         data: {
-            id: number;
+            /** UUID public : jamais la clé primaire, cf. app/Support/HasPublicId.php. */
+            publicId: string;
             memberName: string;
             membershipCode: string | null;
             tier: string;
@@ -57,7 +59,7 @@ function formatAmount(amount: number, currency: string): string {
 }
 
 async function confirmManually(payment: {
-    id: number;
+    publicId: string;
     memberName: string;
     amount: number;
     currency: string;
@@ -72,7 +74,7 @@ async function confirmManually(payment: {
     });
     if (!confirmed) return;
 
-    router.post(`/admin/paiements/${payment.id}/confirmer`, {}, { preserveScroll: true });
+    router.post(`/admin/paiements/${payment.publicId}/confirmer`, {}, { preserveScroll: true });
 }
 
 const statusOptions = [
@@ -123,7 +125,7 @@ const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({
                     <tbody>
                         <tr
                             v-for="payment in payments.data"
-                            :key="payment.id"
+                            :key="payment.publicId"
                             class="border-b border-sand-100 last:border-0"
                         >
                             <td class="px-6 py-3 whitespace-nowrap text-ink">{{ payment.memberName }}</td>
@@ -137,9 +139,7 @@ const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({
                                 {{ payment.gatewayReference ?? '—' }}
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap">
-                                <Badge :tone="paymentStatus(payment.status).tone">{{
-                                    paymentStatus(payment.status).label
-                                }}</Badge>
+                                <StatusBadge kind="payment" :status="payment.status" />
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap text-ink-soft">{{ payment.createdAt }}</td>
                             <td class="px-6 py-3 whitespace-nowrap">
@@ -149,6 +149,7 @@ const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({
                                     variant="secondary"
                                     @click="confirmManually(payment)"
                                 >
+                                    <Check class="size-4" aria-hidden="true" />
                                     Confirmer
                                 </Button>
                             </td>
@@ -156,9 +157,11 @@ const tierOptions = Object.entries(props.tiers).map(([value, tierInfo]) => ({
                     </tbody>
                 </table>
             </div>
-            <p v-else class="px-6 py-8 text-center font-sans text-sm text-ink-soft">
-                Aucun paiement ne correspond à ces filtres.
-            </p>
+            <EmptyState
+                :icon="Wallet"
+                title="Aucun paiement à afficher"
+                description="Les cotisations réglées depuis le site apparaissent ici. Un règlement reçu en espèces ou par virement se confirme à la main depuis cette liste."
+            />
 
             <Pagination
                 :links="payments.links"

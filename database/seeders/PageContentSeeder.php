@@ -43,7 +43,7 @@ class PageContentSeeder extends Seeder
             'hero' => [
                 'kicker' => 'Alliance pour la Synergie des Actions Républicaines (ALSAR)',
                 'headline' => "La Force du Changement, l'énergie du Progrès.",
-                'body' => "ALSAR est un parti politique sénégalais porté par une troisième voie pragmatique — entre opposition et pouvoir en place, tournée vers des résultats concrets pour le Sénégal.",
+                'body' => 'ALSAR est un parti politique sénégalais porté par une troisième voie pragmatique — entre opposition et pouvoir en place, tournée vers des résultats concrets pour le Sénégal.',
                 'cta_primary_label' => 'Rejoindre ALSAR',
                 'cta_secondary_label' => 'Découvrir le programme',
                 'slides' => [
@@ -69,7 +69,7 @@ class PageContentSeeder extends Seeder
             'impact_stats' => [
                 'kicker' => 'Bilan & trajectoire',
                 'title' => 'Des engagements tenus, une trajectoire claire.',
-                'intro' => "De la mairie de Podor à la scène nationale, ALSAR avance par des actes vérifiables plutôt que par des slogans.",
+                'intro' => 'De la mairie de Podor à la scène nationale, ALSAR avance par des actes vérifiables plutôt que par des slogans.',
                 'video' => $this->img($slug, 'impact_stats', 'video', '/videos/videoHero.mp4', 'ALSAR sur le terrain — mobilisation et action à Podor'),
                 'stats' => [
                     ['mode' => 'count_up_year', 'value' => '2022', 'label' => 'ans à la tête de la mairie de Podor, élu en janvier 2022.'],
@@ -80,6 +80,7 @@ class PageContentSeeder extends Seeder
             'program_pillars' => [
                 'kicker' => 'Le programme',
                 'title' => 'Trois axes, parmi six, pour transformer le Sénégal.',
+                'intro' => "Du pouvoir d'achat à la gouvernance, chaque axe répond à un besoin identifié sur le terrain, avec des engagements chiffrés et vérifiables.",
                 'cta_label' => 'Voir les 6 axes du programme',
                 'pillars' => [
                     [
@@ -163,11 +164,11 @@ class PageContentSeeder extends Seeder
             'histoire' => [
                 'title' => 'Notre histoire',
                 'chronology' => [
-                    ['date' => 'Avant 2014', 'text' => "Mamadou Racine Sy se fait connaître comme entrepreneur hôtelier (PDG du King Fahd Palace) et figure du patronat touristique sénégalais."],
-                    ['date' => '2014', 'text' => "Convaincu que le développement doit partir des territoires, Mamadou Racine Sy crée ALPAR (And Liggey Podor ak Racine), mouvement citoyen destiné à accompagner les initiatives de développement dans le département de Podor."],
+                    ['date' => 'Avant 2014', 'text' => 'Mamadou Racine Sy se fait connaître comme entrepreneur hôtelier (PDG du King Fahd Palace) et figure du patronat touristique sénégalais.'],
+                    ['date' => '2014', 'text' => 'Convaincu que le développement doit partir des territoires, Mamadou Racine Sy crée ALPAR (And Liggey Podor ak Racine), mouvement citoyen destiné à accompagner les initiatives de développement dans le département de Podor.'],
                     ['date' => '2019', 'text' => "Face à l'adhésion grandissante des populations, ALPAR évolue pour devenir ALSAR (And Liggey Sénégal ak Racine), mouvement national porté par le travail, la solidarité, l'investissement productif et la bonne gouvernance."],
                     ['date' => 'Janvier 2022', 'text' => 'Élection de Mamadou Racine Sy à la mairie de Podor.'],
-                    ['date' => '2024', 'text' => "Le mouvement ALSAR participe pour la première fois à une élection nationale, en présentant une liste indépendante aux élections législatives — nouvelle étape de son implantation politique."],
+                    ['date' => '2024', 'text' => 'Le mouvement ALSAR participe pour la première fois à une élection nationale, en présentant une liste indépendante aux élections législatives — nouvelle étape de son implantation politique.'],
                     ['date' => '2026', 'text' => "Après plus d'une décennie d'implantation progressive commencée avec ALPAR, ALSAR obtient sa reconnaissance officielle comme parti politique sous l'appellation Alliance pour la Synergie des Actions Républicaines (ALSAR), consacrant un travail de terrain engagé depuis 2014 et ouvrant une nouvelle phase de structuration nationale."],
                 ],
                 'image' => $this->img($slug, 'histoire', 'image', '/images/slider-img-1.webp', "ALSAR — illustration de l'histoire du parti"),
@@ -179,7 +180,7 @@ class PageContentSeeder extends Seeder
                     ['label' => 'Présidence du parti', 'value' => 'Mamadou Racine Sy'],
                     ['label' => 'Coordination locale identifiée', 'value' => 'ALSAR Sagatta — Ndeye Sarr Diop'],
                 ],
-                'note' => "Les mouvements des jeunes et des femmes ainsi que les coordinations régionales/départementales sont en cours de structuration officielle. Cette page sera complétée au fur et à mesure de leur mise en place.",
+                'note' => 'Les mouvements des jeunes et des femmes ainsi que les coordinations régionales/départementales sont en cours de structuration officielle. Cette page sera complétée au fur et à mesure de leur mise en place.',
             ],
             'statuts' => [
                 'kicker' => 'Statuts & Transparence',
@@ -222,10 +223,10 @@ class PageContentSeeder extends Seeder
                     ['date' => 'Années 1990', 'text' => 'Développement des activités hôtelières du Groupe Sy, qui devient un acteur majeur du tourisme sénégalais.'],
                     ['date' => 'Années 2000', 'text' => "Direction du King Fahd Palace : renforce le groupe hôtelier et œuvre au rayonnement international de la destination Sénégal, à la création d'emplois et à l'investissement touristique."],
                     ['date' => 'Années 2000-2020', 'text' => "Accède aux principales responsabilités patronales nationales et régionales : Président de la Fédération des Organisations Patronales de l'Industrie Touristique du Sénégal (FOPITS), Président du Conseil National du Tourisme, Président de la COPITOUR/CEDEAO, Premier Vice-Président du Conseil National du Patronat (CNP). Il siège également dans plusieurs conseils d'administration, dont l'IPRES, la Caisse de Sécurité Sociale, Sénégal Hôtels et Africa Global Logistics (AGL)."],
-                    ['date' => '2014', 'text' => "Convaincu que le développement doit partir des territoires, crée ALPAR (And Liggey Podor ak Racine), mouvement citoyen destiné à accompagner les initiatives de développement dans le département de Podor."],
+                    ['date' => '2014', 'text' => 'Convaincu que le développement doit partir des territoires, crée ALPAR (And Liggey Podor ak Racine), mouvement citoyen destiné à accompagner les initiatives de développement dans le département de Podor.'],
                     ['date' => '2019', 'text' => "Face à l'adhésion grandissante des populations, ALPAR évolue pour devenir ALSAR (And Liggey Sénégal ak Racine), mouvement national porté par le travail, la solidarité, l'investissement productif et la bonne gouvernance."],
-                    ['date' => 'Janvier 2022', 'text' => "Élu maire de la commune de Podor — conduit depuis lors plusieurs projets structurants : assainissement, éclairage public, modernisation du marché central, voirie, aménagement urbain et actions sociales en faveur des jeunes, des femmes et des personnes vulnérables."],
-                    ['date' => '2024', 'text' => "Le mouvement ALSAR participe pour la première fois à une élection nationale, en présentant une liste indépendante aux élections législatives."],
+                    ['date' => 'Janvier 2022', 'text' => 'Élu maire de la commune de Podor — conduit depuis lors plusieurs projets structurants : assainissement, éclairage public, modernisation du marché central, voirie, aménagement urbain et actions sociales en faveur des jeunes, des femmes et des personnes vulnérables.'],
+                    ['date' => '2024', 'text' => 'Le mouvement ALSAR participe pour la première fois à une élection nationale, en présentant une liste indépendante aux élections législatives.'],
                     ['date' => '2026', 'text' => "Après plus d'une décennie d'implantation progressive commencée avec ALPAR, ALSAR obtient sa reconnaissance officielle comme parti politique sous l'appellation Alliance pour la Synergie des Actions Républicaines (ALSAR) — ouvrant une nouvelle phase de structuration nationale."],
                 ],
                 'image' => $this->img($slug, 'parcours', 'image', '/images/Photo-président-racine-sy-2.jpeg', 'ALSAR — illustration du parcours du Président'),
@@ -291,7 +292,7 @@ class PageContentSeeder extends Seeder
                 ],
             ],
             'default_note' => [
-                'text' => "ALSAR est présent dans cette région. Le nom et les contacts de sa coordination locale ne sont pas encore publiés — cette page sera mise à jour au fur et à mesure de leur communication officielle.",
+                'text' => 'ALSAR est présent dans cette région. Le nom et les contacts de sa coordination locale ne sont pas encore publiés — cette page sera mise à jour au fur et à mesure de leur communication officielle.',
             ],
             'sections_locales' => [
                 'kicker' => 'Sections locales',

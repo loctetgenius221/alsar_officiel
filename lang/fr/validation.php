@@ -252,6 +252,12 @@ return [
         // Connexion admin
         'password' => 'mot de passe',
         'remember' => 'se souvenir de moi',
+
+        // Comptes du back-office
+        'name' => 'nom complet',
+        'role' => 'rôle',
+        'current_password' => 'mot de passe actuel',
+        'password_confirmation' => 'confirmation du mot de passe',
     ],
 
 ];

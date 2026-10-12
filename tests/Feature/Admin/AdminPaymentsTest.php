@@ -19,7 +19,7 @@ it('confirme manuellement un paiement en attente et active l\'adhérent', functi
     $payment = MembershipPayment::factory()->create(['member_id' => $member->id, 'status' => 'pending']);
 
     $this->actingAs($this->admin)
-        ->post("/admin/paiements/{$payment->id}/confirmer")
+        ->post("/admin/paiements/{$payment->getRouteKey()}/confirmer")
         ->assertRedirect();
 
     expect($payment->fresh()->status)->toBe('success');
@@ -30,7 +30,7 @@ it('refuse de reconfirmer un paiement déjà traité', function () {
     $member = Member::factory()->active()->create();
     $payment = MembershipPayment::factory()->success()->create(['member_id' => $member->id]);
 
-    $response = $this->actingAs($this->admin)->post("/admin/paiements/{$payment->id}/confirmer");
+    $response = $this->actingAs($this->admin)->post("/admin/paiements/{$payment->getRouteKey()}/confirmer");
 
     $response->assertRedirect();
     $response->assertSessionHas('error');

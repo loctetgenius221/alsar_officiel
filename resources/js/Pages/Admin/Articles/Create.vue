@@ -9,6 +9,7 @@ import { ARTICLE_FIELD_LABELS } from '@/lib/field-labels';
 import { focusFirstError } from '@/lib/form-errors';
 import { useUnsavedChanges } from '@/Composables/useUnsavedChanges';
 import { confirmAction } from '@/lib/confirm';
+import { Save } from '@lucide/vue';
 
 defineOptions({ layout: AdminLayout });
 setLayoutProps({ title: 'Nouvel article' });
@@ -71,6 +72,7 @@ async function cancel() {
             <div class="flex items-center gap-3">
                 <Button variant="secondary" @click="cancel">Annuler</Button>
                 <Button type="submit" :disabled="form.processing">
+                    <Save class="size-4" aria-hidden="true" />
                     {{ form.processing ? 'Enregistrement…' : 'Enregistrer' }}
                 </Button>
             </div>

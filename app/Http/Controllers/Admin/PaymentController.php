@@ -22,7 +22,8 @@ class PaymentController extends Controller
             ->paginate(20)
             ->withQueryString()
             ->through(fn (MembershipPayment $payment) => [
-                'id' => $payment->id,
+                // Identifiant public (UUID) et jamais la clé primaire — cf. App\Support\HasPublicId.
+                'publicId' => $payment->getRouteKey(),
                 'memberName' => $payment->member?->fullName() ?? '—',
                 'membershipCode' => $payment->member?->membership_code,
                 'tier' => $payment->tier,

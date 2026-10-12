@@ -74,7 +74,7 @@ it('modifie un article existant', function () {
     $article = Article::factory()->for($this->category, 'category')->create(['title' => 'Ancien titre']);
 
     $this->actingAs($this->admin)
-        ->patch("/admin/actualites/{$article->id}", validArticlePayload($this->category->id, [
+        ->patch("/admin/actualites/{$article->getRouteKey()}", validArticlePayload($this->category->id, [
             'title' => 'Nouveau titre',
             'slug' => $article->slug,
         ]))
@@ -87,7 +87,7 @@ it('supprime (soft delete) un article', function () {
     $article = Article::factory()->for($this->category, 'category')->create();
 
     $this->actingAs($this->admin)
-        ->delete("/admin/actualites/{$article->id}")
+        ->delete("/admin/actualites/{$article->getRouteKey()}")
         ->assertRedirect('/admin/actualites');
 
     expect(Article::find($article->id))->toBeNull();

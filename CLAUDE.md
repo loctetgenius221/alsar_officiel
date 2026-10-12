@@ -47,7 +47,7 @@ Tests : Pest, `RefreshDatabase` appliqué à tout `tests/Feature` (`tests/Pest.p
 | medialibrary, Scout, Turnstile, Sentry, backup, Playwright | **pas installés** (phases ultérieures). Anti-bot actuel = champ **honeypot** `website` dans `StoreMemberRequest` |
 | Entités Region/Department/Commune | **pas de tables** : `region` et `commune` sont des colonnes texte sur `members`, la liste des 14 régions vit dans `config/adhesion.php` **et** `resources/js/lib/senegal-regions.ts` (à garder synchronisées) |
 | CMS actualités/médiathèque | **pas de CMS** : le contenu éditorial est en dur dans `resources/js/lib/articles.ts` ; les pages non livrées affichent `Components/ui/ComingSoon.vue` plutôt que du faux contenu |
-| Rôles Éditeur/Trésorier/CM | **un seul rôle**, `Super-admin` (`RolesSeeder`), exigé par toutes les routes `/admin` |
+| Rôles Éditeur/Trésorier/CM | **trois rôles** : `Super-admin`, `Gestionnaire de contenu`, `Rédacteur d'articles` (pas de Trésorier tant que la cotisation est désactivée). Catalogue rôles/permissions dans `app/Support/AdminRoles.php`, routes protégées par `can:<permission>` (`routes/admin.php`), menu filtré par `resources/js/lib/permissions.ts`. Le Super-admin passe tout via un `Gate::before` (`AppServiceProvider`) pour qu'un `db:seed` oublié ne l'enferme pas dehors. Comptes gérés depuis `/admin/utilisateurs` (création, rôle, mot de passe, **blocage** — jamais de suppression, les articles gardent leur auteur) ; chacun change son mot de passe depuis `/admin/mon-compte` |
 | `docs/ALSAR_Audit_et_Dossier_Complet.docx` | le .docx est à la **racine** ; `docs/` ne contient que `design-system.md` |
 
 Fichiers `vite.config.js` / `vitest.config.js` / `*.d.ts` à la racine : **artefacts générés** par `vue-tsc -b`, ne pas les éditer — la source est le `.ts`.
@@ -61,6 +61,7 @@ Fichiers `vite.config.js` / `vitest.config.js` / `*.d.ts` à la racine : **artef
 - **Résolution des pages** : `resources/js/app.ts` fait `import.meta.glob('./Pages/**/*.vue')` ; toute page doit donc exister sous `Pages/Site/` ou `Pages/Admin/` avec le nom exact passé à `Inertia::render`.
 - **Props partagées** (`HandleInertiaRequests`) : `auth.user`, `auth.roles`, `flash.success`, `flash.error`.
 - **Domaine métier** : `app/Domain/{Members,Payments}/` (Models + Actions), pas `app/Models/` — sauf `User`. Les modèles hors `App\Models` doivent déclarer `newFactory()` explicitement (Laravel ne devine pas la factory).
+- **Identifiants dans les URLs** : aucune clé primaire n'apparaît jamais dans une URL. `User`, `Article` et `MembershipPayment` portent le trait `App\Support\HasPublicId` (colonne `public_id`, UUID v4, `getRouteKeyName()`), `Member` se résout par son `membership_code` et `PageContent` par son `slug`. Conséquence pour tout nouvel écran : les contrôleurs transmettent `'publicId' => $model->getRouteKey()` (jamais `'id' => $model->id`) et les pages Vue construisent leurs URLs à partir de là — cf. `tests/Feature/Admin/OpaqueUrlsTest.php`, qui échoue si une clé primaire ressort.
 - **Actions** : une classe = une opération métier (`RegisterMember`, `ConfirmMembershipPayment`, `BuildMembershipQrCode`, `ToggleMemberStatus`, `ResendMembershipCard`), injectées dans les contrôleurs.
 
 ### D. Parcours d'adhésion (le cœur du produit)
@@ -80,6 +81,7 @@ Règles à ne jamais casser :
 
 - Tokens de design : bloc `@theme` de `resources/css/app.css` (Tailwind v4 CSS-first). **Aucune couleur/taille en dur** dans les composants ; détail des tokens dans `docs/design-system.md`.
 - Polices auto-hébergées via Fontsource (Fraunces + Public Sans), aucune requête tierce.
+- Iconographie back-office : **Lucide uniquement** (`@lucide/vue`), jamais deux familles mélangées. Échelle fixe — `size-4` dans un bouton ou un titre de carte, `size-3.5` dans une pastille, `size-5` dans un carré teinté de KPI. Une icône qui accompagne du texte est **décorative** : `aria-hidden="true"` systématique ; un bouton à icône seule porte `aria-label` **et** `title`. Un même concept garde le même glyphe partout : les statuts passent par `lib/status.ts` + `Components/admin/StatusBadge.vue` (icône **et** couleur, pour ne pas faire reposer l'information sur la seule teinte — WCAG 1.4.1), les listes vides par `Components/ui/EmptyState.vue`.
 - Motion : GSAP + ScrollTrigger enregistrés une seule fois dans `app.ts`, Lenis via `useLenis`. Toute animation passe par un composable de `Composables/` (`useGsapReveal`, `useCountUp`, `useParallax`, `useScrollReveal`) et **doit** court-circuiter sur `useReducedMotion()`.
 - `cn()` (`lib/utils.ts`, clsx + tailwind-merge) pour composer les classes conditionnelles.
 - Routes côté JS via Ziggy (`route('adhesion.create')`, global déclaré dans ESLint) — d'où l'obligation de regénérer `ziggy.js`.

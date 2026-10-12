@@ -3,6 +3,7 @@
 namespace App\Domain\Payments\Models;
 
 use App\Domain\Members\Models\Member;
+use App\Support\HasPublicId;
 use Database\Factories\MembershipPaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class MembershipPayment extends Model
 {
-    use HasFactory;
+    use HasFactory, HasPublicId;
 
     protected function casts(): array
     {

@@ -3,6 +3,7 @@
 namespace App\Domain\Content\Models;
 
 use App\Models\User;
+use App\Support\HasPublicId;
 use Database\Factories\ArticleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +20,9 @@ use Illuminate\Support\Facades\Storage;
 ])]
 class Article extends Model
 {
-    use HasFactory, SoftDeletes;
+    // Côté back-office, un article se résout par son `public_id` (HasPublicId) ; côté site
+    // public, la route /actualites/{slug} passe par le contrôleur et non par ce binding.
+    use HasFactory, HasPublicId, SoftDeletes;
 
     protected function casts(): array
     {

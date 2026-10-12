@@ -27,7 +27,8 @@ class ArticleController extends Controller
             ->paginate(20)
             ->withQueryString()
             ->through(fn (Article $article) => [
-                'id' => $article->id,
+                // Identifiant public (UUID) et jamais la clé primaire — cf. App\Support\HasPublicId.
+                'publicId' => $article->getRouteKey(),
                 'title' => $article->title,
                 'slug' => $article->slug,
                 'category' => $article->category->name,
@@ -63,7 +64,7 @@ class ArticleController extends Controller
     {
         return Inertia::render('Admin/Articles/Edit', [
             'article' => [
-                'id' => $article->id,
+                'publicId' => $article->getRouteKey(),
                 'categoryId' => $article->category_id,
                 'title' => $article->title,
                 'slug' => $article->slug,

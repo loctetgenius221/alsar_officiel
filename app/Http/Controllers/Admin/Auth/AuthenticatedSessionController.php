@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureUserIsNotBlocked;
 use App\Http\Requests\Admin\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,6 +29,17 @@ class AuthenticatedSessionController extends Controller
             // cause n°1 d'échec sur un clavier mobile.
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+            ]);
+        }
+
+        // Vérifié APRÈS l'authentification, jamais avant : annoncer « compte suspendu » sur la
+        // seule foi d'une adresse email permettrait d'énumérer les comptes existants
+        // (CLAUDE.md §8). Ici, seul quelqu'un qui connaît déjà le mot de passe l'apprend.
+        if ($request->user()->isBlocked()) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'email' => EnsureUserIsNotBlocked::MESSAGE,
             ]);
         }
 

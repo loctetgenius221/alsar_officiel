@@ -22,6 +22,15 @@ export const ARTICLE_FIELD_LABELS: Record<string, string> = {
     seo_description: 'Description SEO',
 };
 
+export const USER_FIELD_LABELS: Record<string, string> = {
+    name: 'Nom complet',
+    email: 'Adresse email',
+    role: 'Rôle',
+    password: 'Mot de passe',
+    password_confirmation: 'Confirmation du mot de passe',
+    current_password: 'Mot de passe actuel',
+};
+
 export const ADHESION_FIELD_LABELS: Record<string, string> = {
     first_name: 'Prénom',
     last_name: 'Nom',

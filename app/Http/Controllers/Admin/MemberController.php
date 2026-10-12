@@ -25,7 +25,8 @@ class MemberController extends Controller
             ->paginate(20)
             ->withQueryString()
             ->through(fn (Member $member) => [
-                'id' => $member->id,
+                // Le code d'adhésion EST la clé de route de l'adhérent (Member::getRouteKeyName) :
+                // aucune clé primaire transmise, donc aucun compteur d'adhérents devinable.
                 'membershipCode' => $member->membership_code,
                 'fullName' => $member->fullName(),
                 'email' => $member->email,
@@ -49,7 +50,6 @@ class MemberController extends Controller
 
         return Inertia::render('Admin/Members/Show', [
             'member' => [
-                'id' => $member->id,
                 'membershipCode' => $member->membership_code,
                 'fullName' => $member->fullName(),
                 'email' => $member->email,
@@ -70,7 +70,7 @@ class MemberController extends Controller
                 'consentAt' => $member->consent_at->translatedFormat('d F Y, H:i'),
             ],
             'payments' => $member->payments->map(fn ($payment) => [
-                'id' => $payment->id,
+                'publicId' => $payment->getRouteKey(),
                 'tier' => $payment->tier,
                 'amount' => $payment->amount,
                 'currency' => $payment->currency,

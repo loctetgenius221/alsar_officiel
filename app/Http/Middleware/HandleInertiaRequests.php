@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Domain\Content\Models\PageContent;
+use App\Support\AdminRoles;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
@@ -42,6 +43,12 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user()?->only('id', 'name', 'email'),
                 'roles' => $request->user()?->getRoleNames(),
+                // Permissions effectives, pour que le menu et les boutons n'affichent que ce
+                // que le serveur autorisera réellement (lib/permissions.ts). Le Super-admin
+                // reçoit tout le catalogue : ses droits viennent du `Gate::before` de
+                // AppServiceProvider, pas de la table, donc `getAllPermissions()` pourrait
+                // être vide alors qu'il a accès à tout.
+                'permissions' => fn () => $this->permissions($request),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -53,6 +60,22 @@ class HandleInertiaRequests extends Middleware
             // 'site-settings' est modifié.
             'siteSettings' => fn () => $this->siteSettings(),
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function permissions(Request $request): array
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return [];
+        }
+
+        return $user->hasRole(AdminRoles::SUPER_ADMIN)
+            ? AdminRoles::permissions()
+            : $user->getAllPermissions()->pluck('name')->values()->all();
     }
 
     /**

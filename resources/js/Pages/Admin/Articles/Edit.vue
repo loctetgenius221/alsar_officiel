@@ -4,21 +4,21 @@ import { Head, router, setLayoutProps, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import ArticleForm, { type ArticleFormData } from '@/Components/admin/ArticleForm.vue';
 import Button from '@/Components/ui/Button.vue';
-import Badge from '@/Components/ui/Badge.vue';
+import StatusBadge from '@/Components/admin/StatusBadge.vue';
 import FormErrorSummary from '@/Components/ui/FormErrorSummary.vue';
-import { articleStatus } from '@/lib/status';
 import { ARTICLE_FIELD_LABELS } from '@/lib/field-labels';
 import { focusFirstError } from '@/lib/form-errors';
 import { patchWithFiles } from '@/lib/inertia-upload';
 import { confirmAction } from '@/lib/confirm';
 import { useUnsavedChanges } from '@/Composables/useUnsavedChanges';
-import { SquareArrowOutUpRight, Trash2 } from '@lucide/vue';
+import { Save, SquareArrowOutUpRight, Trash2 } from '@lucide/vue';
 
 defineOptions({ layout: AdminLayout });
 
 const props = defineProps<{
     article: {
-        id: number;
+        /** UUID public : jamais la clé primaire, cf. app/Support/HasPublicId.php. */
+        publicId: string;
         categoryId: number;
         title: string;
         slug: string;
@@ -54,7 +54,7 @@ const { allowLeave } = useUnsavedChanges(isDirty);
 function submit() {
     // Même contrainte que l'éditeur de contenu : une couverture envoyée sur un PATCH multipart
     // n'arrive jamais jusqu'à PHP (cf. lib/inertia-upload.ts).
-    patchWithFiles(form, `/admin/actualites/${props.article.id}`, {
+    patchWithFiles(form, `/admin/actualites/${props.article.publicId}`, {
         preserveScroll: true,
         // Le succès est annoncé par le message flashé du serveur (qui précise si l'article est
         // en ligne, en brouillon ou programmé) ; cf. lib/inertia-feedback.ts.
@@ -77,7 +77,7 @@ async function destroy() {
     // Le formulaire peut être « sale » (modifications en cours) : on ne veut pas que le
     // garde-fou demande en plus de confirmer qu'on quitte la page qu'on vient de supprimer.
     allowLeave();
-    router.delete(`/admin/actualites/${props.article.id}`);
+    router.delete(`/admin/actualites/${props.article.publicId}`);
 }
 </script>
 
@@ -88,9 +88,7 @@ async function destroy() {
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-3">
                 <h2 class="font-display text-2xl text-ink">{{ article.title || 'Sans titre' }}</h2>
-                <Badge :tone="articleStatus(article.status).tone">{{
-                    articleStatus(article.status).label
-                }}</Badge>
+                <StatusBadge kind="article" :status="article.status" />
                 <!-- Signal permanent et discret : l'utilisateur sait à tout moment s'il lui
                      reste quelque chose à enregistrer, sans avoir à tenter de quitter la page
                      pour le découvrir. -->
@@ -118,6 +116,7 @@ async function destroy() {
                     Supprimer
                 </button>
                 <Button type="submit" :disabled="form.processing">
+                    <Save class="size-4" aria-hidden="true" />
                     {{ form.processing ? 'Enregistrement…' : 'Enregistrer' }}
                 </Button>
             </div>

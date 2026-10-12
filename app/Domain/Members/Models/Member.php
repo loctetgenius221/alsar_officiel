@@ -41,6 +41,20 @@ class Member extends Model
     }
 
     /**
+     * L'adhérent se résout par son code d'adhésion, jamais par sa clé primaire : une URL
+     * `/admin/adherents/42` révélerait le nombre d'adhérents du parti et permettrait de
+     * parcourir les fiches en incrémentant un nombre.
+     *
+     * Contrairement aux autres modèles, pas besoin du trait HasPublicId ici : `membership_code`
+     * est déjà aléatoire (`strtoupper(Str::random(10))`), unique en base, et c'est l'identifiant
+     * que l'adhérent voit sur sa carte — lui en ajouter un second n'apporterait rien.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'membership_code';
+    }
+
+    /**
      * Le modèle vit sous App\Domain\..., hors de la convention App\Models\ que Laravel
      * utilise pour deviner le nom de la factory — il faut l'indiquer explicitement.
      */

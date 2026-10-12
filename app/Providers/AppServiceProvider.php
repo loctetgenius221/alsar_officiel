@@ -2,9 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Support\AdminRoles;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +25,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Le Super-admin passe toutes les autorisations, sans dépendre de la table des
+        // permissions. C'est une sécurité d'exploitation autant qu'une règle métier : si une
+        // permission est ajoutée au code et que le `db:seed` n'est pas rejoué en production,
+        // l'administrateur doit malgré tout pouvoir accéder à l'écran correspondant — sinon
+        // plus personne ne peut rétablir les droits, y compris ceux des autres comptes.
+        // `null` (et non `false`) quand ce n'est pas un Super-admin : on laisse la main aux
+        // autres vérifications, à commencer par celle de spatie sur les permissions.
+        Gate::before(fn (User $user) => $user->hasRole(AdminRoles::SUPER_ADMIN) ? true : null);
+
+        // Exigence unique pour tous les mots de passe du back-office (création d'un compte,
+        // réinitialisation par un administrateur, changement par l'intéressé) : déclarée ici
+        // pour qu'elle ne puisse pas diverger d'un formulaire à l'autre. Longueur plutôt que
+        // zoo de caractères spéciaux — c'est ce qui résiste réellement, et ce qui se retient.
+        Password::defaults(fn () => Password::min(10)->letters()->numbers());
+
         // Force les URLs générées (asset(), route(), url()) à toujours utiliser APP_URL,
         // même quand le Host header réel diffère (ex. tunnel ngrok qui réécrit le Host vers
         // le vhost Apache local pour le routage, alors que l'URL publique est différente).

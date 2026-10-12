@@ -20,6 +20,7 @@ import { sectionFieldLabels } from '@/lib/field-labels';
 import { focusFirstError } from '@/lib/form-errors';
 import { patchWithFiles } from '@/lib/inertia-upload';
 import { useUnsavedChanges } from '@/Composables/useUnsavedChanges';
+import { Save } from '@lucide/vue';
 
 defineOptions({ layout: AdminLayout });
 
@@ -121,6 +122,7 @@ onBeforeUnmount(() => observer?.disconnect());
                 </p>
             </div>
             <Button type="submit" :disabled="form.processing">
+                <Save class="size-4" aria-hidden="true" />
                 {{ form.processing ? 'Enregistrement…' : 'Enregistrer' }}
             </Button>
         </div>

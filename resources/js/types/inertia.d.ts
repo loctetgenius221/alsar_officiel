@@ -6,6 +6,19 @@ export interface AuthUser {
     email: string;
 }
 
+/**
+ * Doit rester aligné sur les constantes de app/Support/AdminRoles.php : une faute de frappe
+ * dans un `can('articles.manage')` devient ainsi une erreur de compilation (vue-tsc) plutôt
+ * qu'un menu silencieusement vide.
+ */
+export type AdminPermission =
+    | 'articles.manage'
+    | 'page-content.manage'
+    | 'members.manage'
+    | 'payments.manage'
+    | 'users.manage'
+    | 'activity-log.view';
+
 export interface PageImageField {
     url: string | null;
     alt: string;
@@ -40,6 +53,8 @@ declare module '@inertiajs/core' {
             auth: {
                 user: AuthUser | null;
                 roles: string[];
+                /** Permissions effectives — cf. lib/permissions.ts et app/Support/AdminRoles.php. */
+                permissions: AdminPermission[];
             };
             flash: {
                 success: string | null;

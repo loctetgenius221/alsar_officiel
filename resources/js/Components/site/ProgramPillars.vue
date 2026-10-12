@@ -1,31 +1,38 @@
 <script setup lang="ts">
 /**
- * 3 des 6 vrais axes du programme (CLAUDE.md §7.1). Traité en liste éditoriale numérotée,
- * pas en 3 cartes identiques icône+titre+texte (pattern explicitement proscrit, §3).
- * Icônes Lucide (cohérence §2.1) en touche discrète à côté du numéro — pas de gros pictogramme
- * dans un cercle coloré, on reste sur le principe de la liste, pas de la carte.
+ * 3 des 6 vrais axes du programme (CLAUDE.md §7.1), en damier texte / photo.
  *
- * Survol : un panneau photo suit le curseur (pattern "hover follow" des sites d'agence
- * édito/Awwwards), réservé aux pointeurs fins avec vrai survol (souris/trackpad) via
- * useFinePointer et désactivé sous prefers-reduced-motion — un mouvement calé sur le
- * curseur peut gêner, cf. CLAUDE.md §9. Les photos sont les mêmes vraies photos "terrain"
- * réutilisées ailleurs sur le site (aucune n'illustre littéralement un axe précis : c'est
- * un accompagnement atmosphérique, pas une preuve documentaire — cf. politique photo §3.4).
+ * Mise en page : une colonne par axe, et l'ordre carte/photo s'inverse sur les colonnes
+ * impaires — d'où l'alternance en quinconce de la maquette de référence. Les photos gardent un
+ * rapport fixe et la carte de texte occupe la hauteur restante (`flex-1`), ce qui aligne
+ * automatiquement les trois colonnes quelle que soit la longueur des textes.
  *
- * Revenu à ce traitement après retour du client sur la variante "texte/photo alternés en
- * permanence" essayée entre-temps (rendu qui ne convenait pas) — seul `cta_label` est
- * désormais lu depuis le contenu éditable plutôt que codé en dur (correction sans impact
- * visuel : le texte affiché reste identique).
+ * Sur mobile les photos passent en 16:9 : empilées sous chaque carte, trois photos en 7:6
+ * transformaient la section en défilement interminable.
+ *
+ * L'espace vide en haut des cartes n'est pas un oubli : le numéro d'axe reste en tête et le
+ * couple titre + texte est poussé en pied (`justify-between`), exactement comme sur la
+ * maquette. C'est ce décalage qui donne son rythme à la grille.
+ *
+ * Remplace le traitement précédent en liste numérotée avec panneau photo suivant le curseur :
+ * les photos étant désormais visibles en permanence, ce survol n'avait plus d'objet (et avec
+ * lui disparaissent useFinePointer, gsap.quickTo et le panneau flottant).
+ *
+ * Note pour la suite : une variante « texte/photo alternés » avait été écartée par le client
+ * par le passé. Celle-ci est revenue sur demande explicite, maquette à l'appui — la différence
+ * tient au format : grille de cartes compactes, et non bandes pleine largeur.
+ *
+ * Écart assumé vis-à-vis de CLAUDE.md §3 (qui proscrit les « cartes rounded-2xl avec ombre
+ * portée identique partout ») : la maquette demandée repose sur des cartes arrondies. On en
+ * garde le principe mais dans le registre ALSAR — rayon modéré, filet sable d'un demi-pixel,
+ * AUCUNE ombre portée, titres en serif d'affichage et accent or au survol.
  */
 import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
-import gsap from 'gsap';
 import MotifDivider from '@/Components/ui/MotifDivider.vue';
 import { ArrowRight } from '@lucide/vue';
 import { useScrollReveal } from '@/Composables/useScrollReveal';
 import { useParallax } from '@/Composables/useParallax';
-import { useFinePointer } from '@/Composables/useFinePointer';
-import { useReducedMotion } from '@/Composables/useReducedMotion';
 import { resolveIcon } from '@/lib/icon-registry';
 import baobabPattern from '../../../../public/images/pattern-baobab.svg';
 import type { PageImageField } from '@/types/inertia';
@@ -41,21 +48,23 @@ interface Pillar {
 export interface ProgramPillarsSection {
     kicker: string;
     title: string;
+    /** Facultatif : ajouté au schéma après coup, donc absent du contenu déjà en base. */
+    intro?: string;
     cta_label: string;
     pillars: Pillar[];
 }
 
 const props = defineProps<{ section: ProgramPillarsSection }>();
 
-const listRef = ref<HTMLElement | null>(null);
-useScrollReveal(listRef, { stagger: 0.12 });
+const gridRef = ref<HTMLElement | null>(null);
+useScrollReveal(gridRef, { stagger: 0.12 });
 
 // Léger effet de dérive sur le motif décoratif de fond, plus discret que sur une photo
 // (CLAUDE.md §3.5 : "parallax subtil ... pas d'excès").
 const patternRef = ref<HTMLImageElement | null>(null);
 useParallax(patternRef, 6);
 
-// `id` correspond aux ancres des sections sur /programme (Programme.vue) : chaque ligne
+// `id` correspond aux ancres des sections sur /programme (Programme.vue) : chaque carte
 // pointe directement vers le détail de son axe plutôt que de se contenter d'illustrer.
 const pillars = computed(() =>
     props.section.pillars.map((pillar, i) => ({
@@ -63,43 +72,6 @@ const pillars = computed(() =>
         index: String(i + 1).padStart(2, '0'),
     })),
 );
-
-const { hasFinePointer } = useFinePointer();
-const { prefersReducedMotion } = useReducedMotion();
-
-const hoverPanel = ref<HTMLElement | null>(null);
-const hoverImage = ref<string | null>(null);
-const hoverVisible = ref(false);
-
-let quickX: ReturnType<typeof gsap.quickTo> | null = null;
-let quickY: ReturnType<typeof gsap.quickTo> | null = null;
-
-function ensureQuick() {
-    if (!hoverPanel.value || quickX) return;
-    quickX = gsap.quickTo(hoverPanel.value, 'x', { duration: 0.5, ease: 'power3.out' });
-    quickY = gsap.quickTo(hoverPanel.value, 'y', { duration: 0.5, ease: 'power3.out' });
-}
-
-function canFollow() {
-    return hasFinePointer.value && !prefersReducedMotion.value;
-}
-
-function onListMouseMove(event: MouseEvent) {
-    if (!canFollow()) return;
-    ensureQuick();
-    quickX?.(event.clientX + 28);
-    quickY?.(event.clientY - 150);
-}
-
-function onRowEnter(image: PageImageField) {
-    if (!canFollow() || !image.url) return;
-    hoverImage.value = image.url;
-    hoverVisible.value = true;
-}
-
-function onListLeave() {
-    hoverVisible.value = false;
-}
 </script>
 
 <template>
@@ -107,73 +79,73 @@ function onListLeave() {
         <img
             ref="patternRef"
             :src="baobabPattern"
-            alt="Pattern Baobab"
-            class="absolute bottom-0 -left-125 z-1 scale-x-[-1] opacity-30"
+            alt=""
+            aria-hidden="true"
+            class="pointer-events-none absolute bottom-0 -left-125 -z-1 scale-x-[-1] opacity-30"
         />
 
-        <div
-            v-if="hasFinePointer && !prefersReducedMotion"
-            ref="hoverPanel"
-            class="pointer-events-none fixed top-0 left-0 z-40 aspect-4/5 w-52 overflow-hidden rounded-2xl opacity-0 shadow-xl shadow-ink/25 transition-opacity duration-300 sm:w-64"
-            :class="hoverVisible ? 'opacity-100' : 'opacity-0'"
-            aria-hidden="true"
-        >
-            <img v-if="hoverImage" :src="hoverImage" alt="" class="h-full w-full object-cover" />
-        </div>
-
+        <!-- En-tête strictement identique aux autres sections de l'accueil (RegionsTeaser,
+             ImpactStats, PresidentTeaser) : filet à gauche, kicker or, titre en text-display-3,
+             chapô en max-w-lg. La maquette de référence centrait ce bloc ; on garde la
+             convention du site, qui prime sur ce point. -->
         <MotifDivider align="left" size="base" />
         <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ section.kicker }}</p>
         <h2 class="mt-4 max-w-2xl font-display text-display-3 text-ink">
             {{ section.title }}
         </h2>
-
-        <ul
-            ref="listRef"
-            class="mt-14 divide-y divide-sand-200 border-t border-sand-200"
-            @mousemove="onListMouseMove"
-            @mouseleave="onListLeave"
+        <p
+            v-if="section.intro"
+            class="mt-5 max-w-lg font-sans text-base leading-(--text-body--line-height) text-ink-soft"
         >
-            <li v-for="(pillar, i) in pillars" :key="pillar.id">
-                <Link
-                    :href="`/programme#${pillar.id}`"
-                    class="group grid gap-4 py-10 lg:grid-cols-12 lg:items-center"
-                    :class="i % 2 === 1 ? 'lg:text-right' : ''"
-                    @mouseenter="onRowEnter(pillar.image)"
+            {{ section.intro }}
+        </p>
+
+        <div ref="gridRef" class="mt-14 grid gap-4 md:grid-cols-3 md:gap-5">
+            <Link
+                v-for="(pillar, i) in pillars"
+                :key="pillar.id"
+                :href="`/programme#${pillar.id}`"
+                class="group flex flex-col gap-4 md:gap-5"
+                :class="i % 2 === 1 ? 'md:flex-col-reverse' : ''"
+            >
+                <!-- `flex-1` : la carte absorbe la hauteur que la photo ne prend pas, donc les
+                     trois colonnes se terminent au même niveau sans hauteur figée. -->
+                <article
+                    class="flex flex-1 flex-col justify-between rounded-xl border border-sand-200 bg-paper-dim/40 p-6 transition-colors duration-300 group-hover:border-gold-500/60"
                 >
-                    <div
-                        class="flex items-center gap-3 lg:col-span-2"
-                        :class="i % 2 === 1 ? 'lg:flex-row-reverse' : ''"
-                    >
+                    <p class="flex items-center gap-2 font-sans text-sm text-ink-soft/70">
                         <component
                             :is="resolveIcon(pillar.icon)"
-                            class="size-5 shrink-0 text-gold-600 transition-transform duration-300 group-hover:scale-110"
+                            class="size-4 shrink-0 text-gold-600"
                             aria-hidden="true"
                         />
-                        <p>
-                            <span class="font-display text-4xl text-gold-500">{{ pillar.index }}</span>
-                            <span
-                                class="font-display text-lg text-gold-300/70 transition-colors duration-300 group-hover:text-gold-500"
-                                >/06</span
-                            >
+                        <span>(Axe {{ pillar.index }})</span>
+                    </p>
+
+                    <div class="mt-12">
+                        <h3
+                            class="font-display text-display-4 text-ink decoration-gold-500/60 underline-offset-4 group-hover:underline"
+                        >
+                            {{ pillar.title }}
+                        </h3>
+                        <p class="mt-2 font-sans text-sm leading-(--text-body--line-height) text-ink-soft">
+                            {{ pillar.text }}
                         </p>
                     </div>
-                    <h3
-                        class="font-display text-2xl text-ink group-hover:underline lg:col-span-4"
-                        :class="i % 2 === 1 ? 'lg:col-start-9' : 'lg:col-start-3'"
-                    >
-                        {{ pillar.title }}
-                    </h3>
-                    <p
-                        class="font-sans text-base leading-(--text-body--line-height) text-ink-soft lg:col-span-4"
-                        :class="i % 2 === 1 ? 'lg:col-start-5' : 'lg:col-start-7'"
-                    >
-                        {{ pillar.text }}
-                    </p>
-                </Link>
-            </li>
-        </ul>
+                </article>
 
-        <div class="mt-10 flex justify-center">
+                <figure v-if="pillar.image.url" class="overflow-hidden rounded-xl">
+                    <img
+                        :src="pillar.image.url"
+                        :alt="pillar.image.alt"
+                        loading="lazy"
+                        class="aspect-16/9 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04] md:aspect-7/6"
+                    />
+                </figure>
+            </Link>
+        </div>
+
+        <div class="mt-12 flex justify-center">
             <Link
                 href="/programme"
                 class="group relative inline-flex items-center gap-2 pb-1 font-sans text-sm font-medium text-ink after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-gold-500 after:transition-transform after:duration-300 hover:after:scale-x-100"

@@ -33,10 +33,22 @@ class ActivityLogController extends Controller
     {
         $subject = $activity->subject;
 
+        // L'objet a été supprimé depuis : on le dit, au lieu d'afficher un tiret qui laisse
+        // croire à une donnée manquante. C'est une information utile dans un journal d'audit.
         if (! $subject) {
-            return '—';
+            return 'supprimé depuis';
         }
 
-        return method_exists($subject, 'fullName') ? $subject->fullName() : "#{$subject->getKey()}";
+        // On nomme l'objet concerné plutôt que d'afficher « #12 » : un numéro de ligne n'aide
+        // personne à relire un journal d'audit, et c'est précisément la clé primaire qu'on a
+        // cessé d'exposer ailleurs (cf. App\Support\HasPublicId). En dernier recours, on
+        // retombe sur l'identifiant public, opaque lui aussi.
+        return match (true) {
+            method_exists($subject, 'fullName') => $subject->fullName(),
+            filled($subject->title ?? null) => $subject->title,
+            filled($subject->name ?? null) => $subject->name,
+            filled($subject->label ?? null) => $subject->label,
+            default => (string) $subject->getRouteKey(),
+        };
     }
 }

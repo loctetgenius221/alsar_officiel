@@ -22,9 +22,13 @@ import {
     Menu,
     Newspaper,
     SquareArrowOutUpRight,
+    UserCog,
+    UserRound,
     Users,
     X,
 } from '@lucide/vue';
+import { can } from '@/lib/permissions';
+import type { AdminPermission } from '@/types/inertia';
 
 withDefaults(defineProps<{ title?: string }>(), { title: 'Back-office' });
 
@@ -38,7 +42,19 @@ const mobileOpen = ref(false);
 // Regroupé par intention plutôt qu'en liste plate : avec 6 entrées et appelé à grandir,
 // un simple étiquetage de section aide à repérer où se trouve une fonctionnalité au premier
 // coup d'œil, sans transformer la sidebar en arborescence pliable (pas nécessaire ici).
-const navGroups = [
+//
+// `permission` reprend exactement celle du middleware `can:` posé sur la route (routes/admin.php) :
+// une entrée visible mène donc toujours à un écran accessible, et un rédacteur ne découvre pas
+// l'existence d'écrans qui lui répondraient 403. Une entrée sans `permission` est commune à
+// tous les rôles.
+interface NavItem {
+    label: string;
+    href: string;
+    icon: unknown;
+    permission?: AdminPermission;
+}
+
+const allNavGroups: { label: string; items: NavItem[] }[] = [
     {
         label: 'Aperçu',
         items: [{ label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard }],
@@ -46,8 +62,18 @@ const navGroups = [
     {
         label: 'Contenu',
         items: [
-            { label: 'Actualités', href: '/admin/actualites', icon: Newspaper },
-            { label: 'Contenu des pages', href: '/admin/contenu-des-pages', icon: FileEdit },
+            {
+                label: 'Actualités',
+                href: '/admin/actualites',
+                icon: Newspaper,
+                permission: 'articles.manage',
+            },
+            {
+                label: 'Contenu des pages',
+                href: '/admin/contenu-des-pages',
+                icon: FileEdit,
+                permission: 'page-content.manage',
+            },
         ],
     },
     {
@@ -55,13 +81,32 @@ const navGroups = [
         // produit). L'écran et la route restent fonctionnels (accessibles par URL directe),
         // simplement plus mis en avant tant qu'aucun paiement n'est créé.
         label: 'Adhésion',
-        items: [{ label: 'Adhérents', href: '/admin/adherents', icon: Users }],
+        items: [{ label: 'Adhérents', href: '/admin/adherents', icon: Users, permission: 'members.manage' }],
     },
     {
         label: 'Système',
-        items: [{ label: "Journal d'audit", href: '/admin/journal-audit', icon: History }],
+        items: [
+            { label: 'Utilisateurs', href: '/admin/utilisateurs', icon: UserCog, permission: 'users.manage' },
+            {
+                label: "Journal d'audit",
+                href: '/admin/journal-audit',
+                icon: History,
+                permission: 'activity-log.view',
+            },
+        ],
     },
 ];
+
+// Un groupe entièrement filtré disparaît avec son étiquette : laisser « Système » seul au-dessus
+// du vide donnerait l'impression d'un menu cassé.
+const navGroups = computed(() =>
+    allNavGroups
+        .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => !item.permission || can(item.permission)),
+        }))
+        .filter((group) => group.items.length > 0),
+);
 
 const currentPath = computed(() => page.url.split('?')[0]);
 function isActive(href: string): boolean {
@@ -111,12 +156,16 @@ onUnmounted(() => removeNavigateListener?.());
         <aside class="hidden w-64 shrink-0 flex-col bg-ink lg:flex">
             <div class="flex items-center gap-2.5 border-b border-paper/10 px-6 py-5">
                 <img src="/images/logo-alsar.png" alt="" class="size-8 object-contain" />
-                <span class="font-display text-lg text-paper">ALSAR <span class="text-sm text-sand-400">Admin</span></span>
+                <span class="font-display text-lg text-paper"
+                    >ALSAR <span class="text-sm text-sand-400">Admin</span></span
+                >
             </div>
 
             <nav class="flex-1 overflow-y-auto px-3 py-6" aria-label="Navigation back-office">
                 <div v-for="(group, i) in navGroups" :key="group.label" :class="i > 0 ? 'mt-6' : ''">
-                    <p class="px-3 font-sans text-[0.6875rem] font-semibold tracking-wider text-paper/35 uppercase">
+                    <p
+                        class="px-3 font-sans text-[0.6875rem] font-semibold tracking-wider text-paper/35 uppercase"
+                    >
                         {{ group.label }}
                     </p>
                     <div class="mt-2 space-y-1">
@@ -178,8 +227,14 @@ onUnmounted(() => removeNavigateListener?.());
                                 <DialogTitle class="sr-only">Menu de navigation back-office</DialogTitle>
                                 <div class="flex items-center justify-between">
                                     <span class="flex items-center gap-2.5">
-                                        <img src="/images/logo-alsar.png" alt="" class="size-8 object-contain" />
-                                        <span class="font-display text-lg text-paper">ALSAR <span class="text-sm text-sand-400">Admin</span></span>
+                                        <img
+                                            src="/images/logo-alsar.png"
+                                            alt=""
+                                            class="size-8 object-contain"
+                                        />
+                                        <span class="font-display text-lg text-paper"
+                                            >ALSAR <span class="text-sm text-sand-400">Admin</span></span
+                                        >
                                     </span>
                                     <button
                                         type="button"
@@ -191,9 +246,18 @@ onUnmounted(() => removeNavigateListener?.());
                                     </button>
                                 </div>
 
-                                <nav class="flex flex-1 flex-col" aria-label="Navigation back-office (mobile)">
-                                    <div v-for="(group, i) in navGroups" :key="group.label" :class="i > 0 ? 'mt-5' : ''">
-                                        <p class="px-3 font-sans text-[0.6875rem] font-semibold tracking-wider text-paper/35 uppercase">
+                                <nav
+                                    class="flex flex-1 flex-col"
+                                    aria-label="Navigation back-office (mobile)"
+                                >
+                                    <div
+                                        v-for="(group, i) in navGroups"
+                                        :key="group.label"
+                                        :class="i > 0 ? 'mt-5' : ''"
+                                    >
+                                        <p
+                                            class="px-3 font-sans text-[0.6875rem] font-semibold tracking-wider text-paper/35 uppercase"
+                                        >
                                             {{ group.label }}
                                         </p>
                                         <div class="mt-2 space-y-1">
@@ -223,6 +287,14 @@ onUnmounted(() => removeNavigateListener?.());
                                 </nav>
 
                                 <div class="space-y-3 border-t border-paper/10 pt-4">
+                                    <Link
+                                        href="/admin/mon-compte"
+                                        class="flex items-center gap-2 px-3 py-2 font-sans text-sm text-sand-300"
+                                        @click="mobileOpen = false"
+                                    >
+                                        <UserRound class="size-4" aria-hidden="true" />
+                                        Mon compte
+                                    </Link>
                                     <a
                                         href="/"
                                         target="_blank"
@@ -249,16 +321,26 @@ onUnmounted(() => removeNavigateListener?.());
                 </div>
 
                 <div class="flex shrink-0 items-center gap-3 sm:gap-4">
-                    <div class="hidden text-right leading-tight sm:block">
-                        <p class="font-sans text-sm text-ink">{{ user?.name }}</p>
-                        <p class="font-sans text-xs text-ink-soft">{{ primaryRole }}</p>
-                    </div>
-                    <div
-                        class="flex size-9 shrink-0 items-center justify-center rounded-full bg-gold-500 font-display text-sm text-ink"
-                        aria-hidden="true"
+                    <!-- Le bloc identité sert de porte d'entrée vers « Mon compte » : c'est là
+                         qu'on va chercher son propre profil, pas dans une entrée de menu
+                         noyée entre les écrans de gestion. -->
+                    <Link
+                        href="/admin/mon-compte"
+                        class="flex shrink-0 items-center gap-3 transition-opacity hover:opacity-75"
+                        :aria-current="isActive('/admin/mon-compte') ? 'page' : undefined"
                     >
-                        {{ userInitial }}
-                    </div>
+                        <span class="hidden text-right leading-tight sm:block">
+                            <span class="block font-sans text-sm text-ink">{{ user?.name }}</span>
+                            <span class="block font-sans text-xs text-ink-soft">{{ primaryRole }}</span>
+                        </span>
+                        <span class="sr-only">Mon compte</span>
+                        <span
+                            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-gold-500 font-display text-sm text-ink"
+                            aria-hidden="true"
+                        >
+                            {{ userInitial }}
+                        </span>
+                    </Link>
                     <button
                         type="button"
                         class="hidden p-2 text-ink-soft transition-colors hover:text-danger lg:block"

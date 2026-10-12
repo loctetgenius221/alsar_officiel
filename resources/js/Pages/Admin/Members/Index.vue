@@ -5,15 +5,17 @@
  * par URL et pour que l'export CSV applique exactement les mêmes filtres que la liste.
  */
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useDebounceFn } from '@vueuse/core';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Card from '@/Components/ui/Card.vue';
-import Badge from '@/Components/ui/Badge.vue';
 import Input from '@/Components/ui/Input.vue';
 import Select from '@/Components/ui/Select.vue';
+import Button from '@/Components/ui/Button.vue';
+import EmptyState from '@/Components/ui/EmptyState.vue';
+import StatusBadge from '@/Components/admin/StatusBadge.vue';
 import Pagination from '@/Components/admin/Pagination.vue';
-import { memberStatus } from '@/lib/status';
+import { Download, Search, SearchX, Users } from '@lucide/vue';
 
 defineOptions({ layout: AdminLayout });
 setLayoutProps({ title: 'Adhérents' });
@@ -21,7 +23,7 @@ setLayoutProps({ title: 'Adhérents' });
 const props = defineProps<{
     members: {
         data: {
-            id: number;
+            /** Clé de route de l'adhérent (Member::getRouteKeyName), pas sa clé primaire. */
             membershipCode: string;
             fullName: string;
             email: string;
@@ -62,6 +64,15 @@ const debouncedApply = useDebounceFn(applyFilters, 350);
 watch(search, debouncedApply);
 watch([region, status, section], applyFilters);
 
+const hasFilters = computed(() => Boolean(search.value || region.value || status.value || section.value));
+
+function resetFilters() {
+    search.value = '';
+    region.value = '';
+    status.value = '';
+    section.value = '';
+}
+
 function exportUrl(): string {
     const params = new URLSearchParams();
     if (search.value) params.set('search', search.value);
@@ -92,15 +103,22 @@ const sectionOptions = [
             <h2 class="font-display text-2xl text-ink">Adhérents</h2>
             <a
                 :href="exportUrl()"
-                class="border border-sand-300 px-4 py-2 font-sans text-sm text-ink transition-colors hover:border-ink"
+                class="inline-flex items-center gap-2 border border-sand-300 px-4 py-2 font-sans text-sm text-ink transition-colors hover:border-ink"
             >
+                <Download class="size-4" aria-hidden="true" />
                 Exporter en CSV
             </a>
         </div>
 
         <Card>
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Input id="search" v-model="search" label="Recherche" placeholder="Nom, email, téléphone..." />
+                <Input
+                    id="search"
+                    v-model="search"
+                    label="Recherche"
+                    placeholder="Nom, email, téléphone..."
+                    :icon="Search"
+                />
                 <Select
                     id="region"
                     v-model="region"
@@ -108,8 +126,20 @@ const sectionOptions = [
                     :options="regions.map((r) => ({ value: r, label: r }))"
                     placeholder="Toutes"
                 />
-                <Select id="status" v-model="status" label="Statut" :options="statusOptions" placeholder="Tous" />
-                <Select id="section" v-model="section" label="Section" :options="sectionOptions" placeholder="Toutes" />
+                <Select
+                    id="status"
+                    v-model="status"
+                    label="Statut"
+                    :options="statusOptions"
+                    placeholder="Tous"
+                />
+                <Select
+                    id="section"
+                    v-model="section"
+                    label="Section"
+                    :options="sectionOptions"
+                    placeholder="Toutes"
+                />
             </div>
         </Card>
 
@@ -129,11 +159,14 @@ const sectionOptions = [
                     <tbody>
                         <tr
                             v-for="member in members.data"
-                            :key="member.id"
+                            :key="member.membershipCode"
                             class="border-b border-sand-100 last:border-0 hover:bg-sand-50"
                         >
                             <td class="px-6 py-3 whitespace-nowrap">
-                                <Link :href="`/admin/adherents/${member.id}`" class="font-medium text-ink hover:underline">
+                                <Link
+                                    :href="`/admin/adherents/${member.membershipCode}`"
+                                    class="font-medium text-ink hover:underline"
+                                >
                                     {{ member.fullName }}
                                 </Link>
                                 <p class="font-mono text-xs text-ink-soft">{{ member.membershipCode }}</p>
@@ -143,16 +176,33 @@ const sectionOptions = [
                                 <p>{{ member.phone }}</p>
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap text-ink-soft">{{ member.region }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft capitalize">{{ member.section }}</td>
-                            <td class="px-6 py-3 whitespace-nowrap">
-                                <Badge :tone="memberStatus(member.status).tone">{{ memberStatus(member.status).label }}</Badge>
+                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft capitalize">
+                                {{ member.section }}
                             </td>
-                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft">{{ member.joinedAt ?? '—' }}</td>
+                            <td class="px-6 py-3 whitespace-nowrap">
+                                <StatusBadge kind="member" :status="member.status" />
+                            </td>
+                            <td class="px-6 py-3 whitespace-nowrap text-ink-soft">
+                                {{ member.joinedAt ?? '—' }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <p v-else class="px-6 py-8 text-center font-sans text-sm text-ink-soft">Aucun adhérent ne correspond à ces filtres.</p>
+            <EmptyState
+                v-else-if="hasFilters"
+                :icon="SearchX"
+                title="Aucun adhérent ne correspond à ces filtres"
+                description="Essayez un autre nom, ou remettez les filtres à zéro pour voir tous les adhérents."
+            >
+                <Button variant="secondary" @click="resetFilters">Réinitialiser les filtres</Button>
+            </EmptyState>
+            <EmptyState
+                v-else
+                :icon="Users"
+                title="Aucun adhérent pour l'instant"
+                description="Les adhésions remplies depuis le site public apparaissent ici automatiquement, avec leur statut de cotisation."
+            />
 
             <Pagination :links="members.links" :from="members.from" :to="members.to" :total="members.total" />
         </Card>

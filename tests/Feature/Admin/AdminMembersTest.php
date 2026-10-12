@@ -29,7 +29,7 @@ it('bascule le statut d\'un adhérent actif vers inactif et journalise l\'action
     $member = Member::factory()->active()->create();
 
     $this->actingAs($this->admin)
-        ->patch("/admin/adherents/{$member->id}/statut")
+        ->patch("/admin/adherents/{$member->getRouteKey()}/statut")
         ->assertRedirect();
 
     expect($member->fresh()->status)->toBe('inactive');
@@ -42,7 +42,7 @@ it('enregistre une note interne sur la fiche adhérent', function () {
     $member = Member::factory()->create();
 
     $this->actingAs($this->admin)
-        ->patch("/admin/adherents/{$member->id}/note", ['note' => 'À suivre : relancer par téléphone.'])
+        ->patch("/admin/adherents/{$member->getRouteKey()}/note", ['note' => 'À suivre : relancer par téléphone.'])
         ->assertRedirect();
 
     expect($member->fresh()->note)->toBe('À suivre : relancer par téléphone.');
@@ -51,5 +51,5 @@ it('enregistre une note interne sur la fiche adhérent', function () {
 it('empêche un invité d\'accéder à la fiche adhérent', function () {
     $member = Member::factory()->create();
 
-    $this->get("/admin/adherents/{$member->id}")->assertRedirect('/admin/login');
+    $this->get("/admin/adherents/{$member->getRouteKey()}")->assertRedirect('/admin/login');
 });

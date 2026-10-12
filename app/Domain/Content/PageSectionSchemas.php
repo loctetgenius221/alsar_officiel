@@ -363,6 +363,7 @@ class PageSectionSchemas
                 'fields' => [
                     'kicker' => self::text('Kicker', max: 60),
                     'title' => self::text('Titre', max: 150),
+                    'intro' => self::textarea('Chapô sous le titre (facultatif)', max: 300),
                     'cta_label' => self::text('Libellé du lien "Voir les 6 axes"', max: 60),
                     'pillars' => self::repeater('Axes mis en avant', [
                         'id' => [
@@ -373,7 +374,7 @@ class PageSectionSchemas
                         'icon' => self::selectIcon('Icône'),
                         'title' => self::text('Titre', max: 150),
                         'text' => self::textarea('Texte', max: 400),
-                        'image' => self::image('Photo (aperçu au survol)'),
+                        'image' => self::image('Photo'),
                     ], min: 1, max: 6),
                 ],
             ],

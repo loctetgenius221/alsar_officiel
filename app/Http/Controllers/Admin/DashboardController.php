@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Domain\Content\Models\Article;
 use App\Domain\Members\Models\Member;
 use App\Domain\Payments\Models\MembershipPayment;
 use App\Http\Controllers\Controller;
+use App\Support\AdminRoles;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -15,7 +19,28 @@ class DashboardController extends Controller
     /** Nombre de mois affichés sur les graphiques de tendance (adhérents, montant collecté). */
     private const TREND_MONTHS = 6;
 
-    public function index(): InertiaResponse
+    /**
+     * Le dashboard est le seul écran commun à tous les rôles : il se compose donc des blocs que
+     * l'utilisateur a le droit de voir, et rien de plus. Un rédacteur n'y lit pas le nombre
+     * d'adhérents — et le serveur ne l'envoie même pas, plutôt que de compter sur le front
+     * pour masquer une donnée déjà transmise.
+     */
+    public function index(Request $request): InertiaResponse
+    {
+        $user = $request->user();
+
+        return Inertia::render('Admin/Dashboard', [
+            ...($user->can(AdminRoles::MANAGE_MEMBERS) ? $this->membershipPayload() : []),
+            ...($user->can(AdminRoles::MANAGE_ARTICLES) ? ['contentKpis' => $this->contentPayload()] : []),
+        ]);
+    }
+
+    /**
+     * Blocs adhérents/cotisations (permission members.manage).
+     *
+     * @return array<string, mixed>
+     */
+    private function membershipPayload(): array
     {
         $totalMembers = Member::count();
         $activeMembers = Member::where('status', 'active')->count();
@@ -25,7 +50,7 @@ class DashboardController extends Controller
             ->take(10)
             ->get()
             ->map(fn (MembershipPayment $payment) => [
-                'id' => $payment->id,
+                'publicId' => $payment->getRouteKey(),
                 'memberName' => $payment->member?->fullName() ?? '—',
                 'tier' => $payment->tier,
                 'amount' => $payment->amount,
@@ -40,7 +65,7 @@ class DashboardController extends Controller
             ->get();
         $maxRegionCount = (int) ($regionBreakdown->max('total') ?? 0);
 
-        return Inertia::render('Admin/Dashboard', [
+        return [
             'kpis' => [
                 'newMembers30d' => Member::where('created_at', '>=', now()->subDays(30))->count(),
                 'totalCollected' => (int) MembershipPayment::where('status', 'success')->sum('amount'),
@@ -68,7 +93,31 @@ class DashboardController extends Controller
             'paymentStatusBreakdown' => MembershipPayment::selectRaw('status, count(*) as total')
                 ->groupBy('status')
                 ->pluck('total', 'status'),
-        ]);
+        ];
+    }
+
+    /**
+     * Bloc contenu (permission articles.manage) : l'essentiel pour un rédacteur, c'est de voir
+     * d'un coup d'œil ce qui est en ligne, ce qui attend sa date, et ce qui dort en brouillon.
+     *
+     * @return array<string, mixed>
+     */
+    private function contentPayload(): array
+    {
+        return [
+            'published' => Article::whereNotNull('published_at')->where('published_at', '<=', now())->count(),
+            'scheduled' => Article::where('published_at', '>', now())->count(),
+            'drafts' => Article::whereNull('published_at')->count(),
+            'latest' => Article::latest('updated_at')
+                ->take(5)
+                ->get()
+                ->map(fn (Article $article) => [
+                    'publicId' => $article->getRouteKey(),
+                    'title' => $article->title ?: 'Sans titre',
+                    'status' => $article->publicationStatus(),
+                    'updatedAt' => $article->updated_at->translatedFormat('d M Y'),
+                ]),
+        ];
     }
 
     /**
@@ -81,7 +130,7 @@ class DashboardController extends Controller
      *
      * @return array<int, array{label: string, value: int}>
      */
-    private function monthlyTrend(\Illuminate\Database\Eloquent\Builder $query, string $dateColumn, string $sumColumn = ''): array
+    private function monthlyTrend(Builder $query, string $dateColumn, string $sumColumn = ''): array
     {
         $from = now()->startOfMonth()->subMonths(self::TREND_MONTHS - 1);
 

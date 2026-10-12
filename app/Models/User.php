@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\AdminRoles;
+use App\Support\HasPublicId;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -16,7 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasPublicId, HasRoles, Notifiable;
 
     /**
      * Get the attributes that should be cast.
@@ -27,7 +29,22 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'blocked_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Un compte bloqué conserve tout (rôle, articles écrits, historique) mais ne peut plus
+     * ni se connecter ni poursuivre une session déjà ouverte — cf. EnsureUserIsNotBlocked.
+     */
+    public function isBlocked(): bool
+    {
+        return $this->blocked_at !== null;
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(AdminRoles::SUPER_ADMIN);
     }
 }
