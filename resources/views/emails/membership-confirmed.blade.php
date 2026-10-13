@@ -19,6 +19,17 @@
 @php
     $verifyUrl = route('verifier', $member->membership_code);
     $joinedAt = $member->joined_at?->translatedFormat('d F Y');
+
+    // Logo INTÉGRÉ au message (pièce jointe en ligne) plutôt que chargé depuis le site :
+    //   - il s'affiche même quand le client bloque les images distantes, ce que font Outlook
+    //     et de nombreux clients d'entreprise par défaut ;
+    //   - il ne dépend pas de la joignabilité du domaine au moment où l'email est ouvert.
+    // On prend le fichier 192 px (32 Ko) et non logo-alsar.png (152 Ko) : affiché à 40 px, il
+    // est amplement suffisant, et un email n'a pas à transporter 150 Ko de décoration.
+    // `PdfAsset::path()` cherche dans plusieurs racines (même logique que la carte PDF) et
+    // renvoie null si le fichier manque — on retombe alors sur l'URL distante.
+    $logoFile = \App\Support\PdfAsset::path('images/favicon-192.png');
+    $logoSrc = $logoFile ? $message->embed($logoFile) : url('/images/favicon-192.png');
 @endphp
 <!DOCTYPE html>
 <html lang="fr" xmlns="http://www.w3.org/1999/xhtml">
@@ -49,7 +60,12 @@
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f2ede2;">
             <tr>
                 <td align="center" style="padding: 32px 12px;">
-                    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width: 600px; max-width: 600px;">
+                    {{-- Outlook (moteur Word) ignore `max-width` : sans cette table
+                         conditionnelle, le message s'y afficherait sur toute la largeur de la
+                         fenêtre. Les autres clients ne voient que la table fluide, qui se
+                         réduit correctement sur téléphone. --}}
+                    <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px;">
 
                         {{-- En-tête : bandeau encre, logo + mot-symbole. Le texte porte le sens,
                              l'image ne fait que l'accompagner. --}}
@@ -59,11 +75,11 @@
                                     <tr>
                                         <td style="padding-right: 12px; vertical-align: middle;">
                                             <img
-                                                src="{{ url('/images/logo-alsar.png') }}"
-                                                width="36"
-                                                height="36"
+                                                src="{{ $logoSrc }}"
+                                                width="40"
+                                                height="40"
                                                 alt=""
-                                                style="display: block; width: 36px; height: 36px; border: 0;"
+                                                style="display: block; width: 40px; height: 40px; border: 0;"
                                             />
                                         </td>
                                         <td style="vertical-align: middle;">
@@ -177,6 +193,7 @@
                             </td>
                         </tr>
                     </table>
+                    <!--[if mso]></td></tr></table><![endif]-->
                 </td>
             </tr>
         </table>
