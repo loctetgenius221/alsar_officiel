@@ -40,8 +40,10 @@ useScrollReveal(el, { stagger: 0.1 });
             </li>
         </ol>
 
-        <div v-if="image" class="hidden lg:sticky lg:top-28 lg:col-span-5 lg:col-start-8 lg:block">
-            <PhotoFrame :src="image" :alt="imageAlt" ratio="portrait" parallax />
+        <!-- `top-36` et non `top-28` : ces pages ont un fil d'ancres collé sous l'en-tête
+             (site/SectionNav.vue), la photo passait dessous. -->
+        <div v-if="image" class="hidden lg:sticky lg:top-36 lg:col-span-5 lg:col-start-8 lg:block">
+            <PhotoFrame :src="image" :alt="imageAlt" ratio="portrait" />
         </div>
     </div>
 </template>

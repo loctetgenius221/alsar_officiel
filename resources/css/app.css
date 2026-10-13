@@ -91,6 +91,10 @@
     /* Halo "actif" sur le siège (Dakar) de la carte du Sénégal — ambiant, indépendant du
        scroll — coupé automatiquement par prefers-reduced-motion ci-dessous */
     --animate-ping-halo: ping-halo 2.6s cubic-bezier(0.35, 0, 0.25, 1) infinite;
+
+    /* Segment lumineux qui descend le long du repère de défilement du hero — ambiant,
+       coupé automatiquement par prefers-reduced-motion ci-dessous */
+    --animate-scroll-cue: scroll-cue 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
 @keyframes marquee {
@@ -109,6 +113,25 @@
     }
     100% {
         r: 17;
+        opacity: 0;
+    }
+}
+
+/* Le segment part au-dessus du filet, le parcourt, puis disparaît en bas : la lecture va vers
+   le bas, comme le geste attendu. */
+@keyframes scroll-cue {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    30%,
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100%);
         opacity: 0;
     }
 }
@@ -378,5 +401,24 @@
 
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
+    }
+
+    /* Trame tissée des surfaces sombres (hero, bloc d'adhésion, bandeau de marque).
+     *
+     * Pourquoi : un aplat navy pleine largeur se lit comme un trou dans la page — c'est
+     * flagrant sur le hero quand sa photo de fond tarde ou manque. Cette trame lui donne de la
+     * matière sans rien ajouter au-dessus du contenu.
+     *
+     * Deux diagonales croisées à ±45°, évocation de tissage (CLAUDE.md §3.3 : motif textile
+     * sénégalais, trait fin, jamais figuratif). En `repeating-linear-gradient` plutôt qu'en
+     * image : net à toutes les densités d'écran, zéro requête, zéro octet à télécharger.
+     *
+     * 2,5 % de blanc : volontairement à la limite du perceptible. On doit sentir la matière
+     * sans jamais voir le motif — au-delà, cela devient un papier peint et le texte en pâtit. */
+    .surface-ink {
+        background-color: var(--color-ink);
+        /* background-image:
+            repeating-linear-gradient(45deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 9px),
+            repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.025) 0 1px, transparent 1px 9px); */
     }
 }

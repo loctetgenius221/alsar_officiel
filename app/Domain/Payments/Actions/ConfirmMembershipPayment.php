@@ -2,9 +2,8 @@
 
 namespace App\Domain\Payments\Actions;
 
+use App\Domain\Members\Actions\SendMembershipEmail;
 use App\Domain\Payments\Models\MembershipPayment;
-use App\Mail\MembershipConfirmed;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Action idempotente partagée par la passerelle simulée ET le futur vrai webhook : appelée
@@ -30,7 +29,7 @@ class ConfirmMembershipPayment
             'joined_at' => $member->joined_at ?? now(),
         ])->save();
 
-        Mail::to($member->email)->queue(new MembershipConfirmed($member, $payment));
+        (new SendMembershipEmail)->handle($member, $payment);
 
         return $payment;
     }

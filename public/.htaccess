@@ -5,6 +5,26 @@
 
     RewriteEngine On
 
+    # Domaine canonique : https://www.alsar.sn
+    #
+    # Sans cette redirection, le site existe en quatre adresses (avec/sans www, http/https) :
+    # les moteurs les traitent comme quatre sites qui se font concurrence, et une session
+    # ouverte sur l'une n'existe pas sur les autres.
+    #
+    # Les deux règles sont volontairement limitées au domaine de production : le vhost local
+    # (alsar.test, en http) ne correspond à aucune, le développement n'est donc jamais
+    # redirigé vers la production.
+    RewriteCond %{HTTP_HOST} ^alsar\.sn$ [NC]
+    RewriteRule ^ https://www.alsar.sn%{REQUEST_URI} [L,R=301]
+
+    # `X-Forwarded-Proto` en plus de `%{HTTPS}` : derrière le proxy de l'hébergeur, Apache
+    # reçoit du http en clair même quand le visiteur est en https. Sans ce test, la règle se
+    # redéclencherait indéfiniment — boucle de redirection, site inaccessible.
+    RewriteCond %{HTTP_HOST} ^(www\.)?alsar\.sn$ [NC]
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://www.alsar.sn%{REQUEST_URI} [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

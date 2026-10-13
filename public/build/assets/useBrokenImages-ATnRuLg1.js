@@ -1,0 +1,1 @@
+import{Xn as e}from"./createLucideIcon-JQYoB9vk.js";function t(){let t=e(new Set);return{isBroken:e=>t.value.has(e),markBroken:e=>{t.value=new Set(t.value).add(e)}}}export{t};

@@ -11,6 +11,7 @@ import { computed, ref } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import SiteLayout from '@/Layouts/SiteLayout.vue';
 import PageHeader from '@/Components/site/PageHeader.vue';
+import PageCta from '@/Components/site/PageCta.vue';
 import SenegalMap from '@/Components/site/SenegalMap.vue';
 import MotifDivider from '@/Components/ui/MotifDivider.vue';
 import { SENEGAL_REGIONS } from '@/lib/senegal-regions';
@@ -35,12 +36,17 @@ interface RegionsSections {
     sections_locales: { kicker: string; title: string };
 }
 
-const props = defineProps<{ sections: RegionsSections; seoTitle: string | null; seoDescription: string | null }>();
+const props = defineProps<{
+    sections: RegionsSections;
+    seoTitle: string | null;
+    seoDescription: string | null;
+}>();
 
 const REGION_DATA = computed(
-    () => Object.fromEntries(props.sections.region_info.regions.map((info) => [info.region_name, info])) as Partial<
-        Record<string, RegionInfo>
-    >,
+    () =>
+        Object.fromEntries(
+            props.sections.region_info.regions.map((info) => [info.region_name, info]),
+        ) as Partial<Record<string, RegionInfo>>,
 );
 
 const DEFAULT_NOTE = props.sections.default_note.text;
@@ -145,4 +151,10 @@ useScrollReveal(statusRef, { stagger: 0.03 });
             </ul>
         </div>
     </section>
+
+    <PageCta
+        title="Aucune coordination près de chez vous ?"
+        body="Les implantations se structurent région par région. Adhérer, c'est aussi faire exister ALSAR là où le parti n'est pas encore organisé."
+        cta-label="Devenir relais local"
+    />
 </template>

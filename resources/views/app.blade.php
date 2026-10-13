@@ -11,7 +11,7 @@
         <link rel="apple-touch-icon" href="/images/favicon-180.png" />
         <link rel="manifest" href="/site.webmanifest" />
 
-        <title inertia>{{ config('app.name', 'ALSAR') }}</title>
+        @include('partials.seo')
 
         @routes
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/Pages/{$page['component']}.vue"])

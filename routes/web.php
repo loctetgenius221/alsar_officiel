@@ -4,6 +4,7 @@ use App\Http\Controllers\Site\AdhesionController;
 use App\Http\Controllers\Site\ArticleController;
 use App\Http\Controllers\Site\HomeController;
 use App\Http\Controllers\Site\PageController;
+use App\Http\Controllers\Site\SitemapController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -21,6 +22,10 @@ Route::get('/actualites/{slug}', [ArticleController::class, 'show'])->name('actu
 Route::get('/mediatheque', [PageController::class, 'mediatheque'])->name('mediatheque');
 
 Route::get('/regions', [PageController::class, 'regions'])->name('regions');
+
+// Sitemap généré à la demande (les actualités viennent du back-office), référencé par
+// public/robots.txt. Toutes ses URLs passent par route(), donc par APP_URL.
+Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
 
 Route::get('/mentions-legales', function () {
     return Inertia::render('Site/MentionsLegales');

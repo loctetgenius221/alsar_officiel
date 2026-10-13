@@ -4,10 +4,8 @@ namespace App\Domain\Members\Actions;
 
 use App\Domain\Members\Models\Member;
 use App\Domain\Payments\Models\MembershipPayment;
-use App\Mail\MembershipConfirmed;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Crée le membre à partir des données déjà validées (StoreMemberRequest). Le montant de la
@@ -59,7 +57,7 @@ class RegisterMember
             // justifierait de le laisser "pending" en l'absence de cotisation à attendre.
             $member->forceFill(['status' => 'active', 'joined_at' => now()])->save();
 
-            Mail::to($member->email)->queue(new MembershipConfirmed($member));
+            (new SendMembershipEmail)->handle($member);
         }
 
         return $member->fresh('payments');

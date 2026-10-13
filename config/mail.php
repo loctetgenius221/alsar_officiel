@@ -111,7 +111,9 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        // Adresse du domaine officiel plutôt que l'exemple de Laravel : un envoi depuis
+        // hello@example.com part en spam ou rebondit, sans que personne ne s'en aperçoive.
+        'address' => env('MAIL_FROM_ADDRESS', 'contact@alsar.sn'),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 

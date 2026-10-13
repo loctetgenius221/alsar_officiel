@@ -26,12 +26,18 @@ useScrollReveal(textCol);
     <section class="mx-auto max-w-6xl px-6 py-22 sm:px-10">
         <div class="grid gap-10 lg:grid-cols-12 lg:gap-8">
             <div class="lg:col-span-5">
-                <PhotoFrame :src="section.portrait.url ?? undefined" :alt="section.portrait.alt" parallax position="right" />
+                <PhotoFrame
+                    :src="section.portrait.url ?? undefined"
+                    :alt="section.portrait.alt"
+                    position="right"
+                />
             </div>
 
             <div ref="textCol" class="lg:col-span-6 lg:col-start-7 lg:self-center">
                 <MotifDivider align="left" size="base" />
-                <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ section.kicker }}</p>
+                <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">
+                    {{ section.kicker }}
+                </p>
 
                 <div class="relative mt-4">
                     <span

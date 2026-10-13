@@ -41,7 +41,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Même repli que config/app.php : sans APP_URL, toutes les images du site
+            // (couvertures d'articles, photos des pages) pointeraient sur localhost.
+            'url' => rtrim(env('APP_URL', 'https://www.alsar.sn'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
             // `report` à true : c'est le disque qui reçoit TOUS les fichiers envoyés depuis

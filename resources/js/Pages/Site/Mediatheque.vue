@@ -10,6 +10,7 @@ import { computed, ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import SiteLayout from '@/Layouts/SiteLayout.vue';
 import PageHeader from '@/Components/site/PageHeader.vue';
+import PageCta from '@/Components/site/PageCta.vue';
 import PhotoGallery from '@/Components/site/PhotoGallery.vue';
 import MotifDivider from '@/Components/ui/MotifDivider.vue';
 import ComingSoon from '@/Components/ui/ComingSoon.vue';
@@ -32,7 +33,11 @@ interface MediathequeSections {
     presse: { kicker: string; title: string; body: string };
 }
 
-const props = defineProps<{ sections: MediathequeSections; seoTitle: string | null; seoDescription: string | null }>();
+const props = defineProps<{
+    sections: MediathequeSections;
+    seoTitle: string | null;
+    seoDescription: string | null;
+}>();
 
 const photos = computed(() =>
     props.sections.gallery.photos
@@ -71,7 +76,9 @@ useScrollReveal(pressRef, { stagger: 0.1 });
     <section class="mx-auto max-w-6xl px-6 py-20 sm:px-10">
         <div ref="photosRef">
             <MotifDivider align="left" size="base" />
-            <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ sections.gallery.kicker }}</p>
+            <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">
+                {{ sections.gallery.kicker }}
+            </p>
             <h2 class="mt-4 font-display text-display-3 text-ink">{{ sections.gallery.title }}</h2>
             <p class="mt-4 max-w-lg font-sans text-base leading-(--text-body--line-height) text-ink-soft">
                 {{ sections.gallery.intro }}
@@ -87,7 +94,9 @@ useScrollReveal(pressRef, { stagger: 0.1 });
             <div ref="videoRef" class="grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-10">
                 <div class="lg:col-span-5">
                     <MotifDivider align="left" size="base" />
-                    <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ sections.video.kicker }}</p>
+                    <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">
+                        {{ sections.video.kicker }}
+                    </p>
                     <h2 class="mt-4 font-display text-display-3 text-ink">{{ sections.video.title }}</h2>
                     <p
                         class="mt-4 max-w-md font-sans text-base leading-(--text-body--line-height) text-ink-soft"
@@ -113,11 +122,17 @@ useScrollReveal(pressRef, { stagger: 0.1 });
 
     <section class="mx-auto max-w-6xl px-6 py-20 sm:px-10">
         <MotifDivider align="left" size="base" />
-        <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ sections.podcasts.kicker }}</p>
+        <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">
+            {{ sections.podcasts.kicker }}
+        </p>
         <h2 class="mt-4 max-w-2xl font-display text-display-3 text-ink">{{ sections.podcasts.title }}</h2>
 
         <div class="mt-10 max-w-2xl">
-            <ComingSoon :icon="Mic" title="Aucun podcast pour l'instant" :text="sections.podcasts.coming_soon_text" />
+            <ComingSoon
+                :icon="Mic"
+                title="Aucun podcast pour l'instant"
+                :text="sections.podcasts.coming_soon_text"
+            />
         </div>
     </section>
 
@@ -125,7 +140,9 @@ useScrollReveal(pressRef, { stagger: 0.1 });
         <div class="mx-auto max-w-6xl px-6 py-20 sm:px-10">
             <div ref="pressRef" class="max-w-2xl">
                 <MotifDivider align="left" size="base" />
-                <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ sections.presse.kicker }}</p>
+                <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">
+                    {{ sections.presse.kicker }}
+                </p>
                 <h2 class="mt-4 font-display text-display-3 text-ink">{{ sections.presse.title }}</h2>
                 <p class="mt-4 font-sans text-base leading-(--text-body--line-height) text-ink-soft">
                     {{ sections.presse.body }}
@@ -142,4 +159,12 @@ useScrollReveal(pressRef, { stagger: 0.1 });
             </div>
         </div>
     </section>
+
+    <PageCta
+        title="Vous avez vu, vous avez lu. À vous de jouer."
+        body="Photos, vidéos et communiqués racontent le terrain. L'étape suivante se passe hors de l'écran : rejoignez le parti près de chez vous."
+        cta-label="Rejoindre ALSAR"
+        secondary-label="Lire les actualités"
+        secondary-href="/actualites"
+    />
 </template>

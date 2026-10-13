@@ -3,9 +3,7 @@
 namespace App\Domain\Members\Actions;
 
 use App\Domain\Members\Models\Member;
-use App\Mail\MembershipConfirmed;
 use App\Models\User;
-use Illuminate\Support\Facades\Mail;
 use RuntimeException;
 
 /**
@@ -24,7 +22,7 @@ class ResendMembershipCard
             throw new RuntimeException("Impossible de renvoyer la carte : l'adhérent n'est pas actif.");
         }
 
-        Mail::to($member->email)->queue(new MembershipConfirmed($member, $payment));
+        (new SendMembershipEmail)->handle($member, $payment);
 
         activity()
             ->causedBy($causedBy)

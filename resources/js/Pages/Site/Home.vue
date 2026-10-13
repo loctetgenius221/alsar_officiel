@@ -40,8 +40,8 @@ setLayoutProps({ heroTransparent: true });
     <PresidentTeaser :section="sections.president_teaser" />
     <ImpactStats :section="sections.impact_stats" />
     <ProgramPillars :section="sections.program_pillars" />
+    <BrandTicker :section="sections.brand_ticker" />
     <RegionsTeaser :section="sections.regions_teaser" />
     <JoinCta :section="sections.join_cta" />
     <NewsTeaser :articles="articles" />
-    <BrandTicker :section="sections.brand_ticker" />
 </template>

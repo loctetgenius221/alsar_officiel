@@ -38,7 +38,11 @@ interface PresidentSections {
     discours: { kicker: string; title: string; press_outlets: { text: string }[]; coming_soon_text: string };
 }
 
-const props = defineProps<{ sections: PresidentSections; seoTitle: string | null; seoDescription: string | null }>();
+const props = defineProps<{
+    sections: PresidentSections;
+    seoTitle: string | null;
+    seoDescription: string | null;
+}>();
 
 const navSections = [
     { id: 'biographie', label: 'Biographie' },
@@ -48,7 +52,10 @@ const navSections = [
 const displayedFacts = computed(() =>
     props.sections.portrait.facts.map((fact) => ({
         ...fact,
-        display: fact.mode === 'count_up_year' ? String(new Date().getFullYear() - parseInt(fact.value, 10)) : fact.value,
+        display:
+            fact.mode === 'count_up_year'
+                ? String(new Date().getFullYear() - parseInt(fact.value, 10))
+                : fact.value,
     })),
 );
 
@@ -77,12 +84,26 @@ useScrollReveal(pressRef, { stagger: 0.1 });
     />
     <SectionNav :items="navSections" />
 
-    <section id="biographie" class="relative mx-auto max-w-6xl scroll-mt-36 overflow-hidden px-6 py-20 sm:px-10">
+    <!-- Pas d'`overflow-hidden` sur cette section : un seul ancêtre avec un overflow
+             different de `visible` suffit à désactiver tout `position: sticky` à l'intérieur
+             (la photo de la frise, ci-dessous, restait donc figée en haut et laissait du vide).
+             Il servait à rogner le motif baobab décoratif, aujourd'hui désactivé ; s'il revient,
+             le rogner sur SON propre conteneur, jamais sur la section entière. -->
+    <section id="biographie" class="relative mx-auto max-w-6xl scroll-mt-36 px-6 py-20 sm:px-10">
         <!-- <BaobabMotif side="left" vertical="bottom" mirror /> -->
 
-        <div class="relative z-5 grid gap-12 lg:grid-cols-12 lg:gap-10">
-            <div class="lg:col-span-5">
-                <PhotoFrame :src="sections.portrait.image.url ?? undefined" :alt="sections.portrait.image.alt" parallax />
+        <div class="relative z-5 grid gap-12 lg:grid-cols-12 lg:items-start lg:gap-10">
+            <!-- Portrait épinglé : la biographie à côté fait plusieurs fois sa hauteur, le
+                 portrait laissait donc une grande zone vide dès qu'on défilait. `lg:items-start`
+                 sur la grille est indispensable : étirée sur toute la hauteur de la rangée (le
+                 défaut), la colonne ne laisse aucune marge de déplacement au sticky.
+                 Desktop uniquement : sur mobile la photo est au-dessus du texte, l'épingler
+                 n'aurait aucun sens. -->
+            <div class="lg:sticky lg:top-36 lg:col-span-5">
+                <PhotoFrame
+                    :src="sections.portrait.image.url ?? undefined"
+                    :alt="sections.portrait.image.alt"
+                />
             </div>
 
             <div ref="textRef" class="lg:col-span-6 lg:col-start-7">
@@ -144,7 +165,11 @@ useScrollReveal(pressRef, { stagger: 0.1 });
             </ul>
 
             <div class="mt-10">
-                <ComingSoon :icon="Video" title="Vidéos et discours à venir" :text="sections.discours.coming_soon_text" />
+                <ComingSoon
+                    :icon="Video"
+                    title="Vidéos et discours à venir"
+                    :text="sections.discours.coming_soon_text"
+                />
             </div>
         </div>
     </section>

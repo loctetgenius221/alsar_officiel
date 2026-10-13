@@ -12,7 +12,6 @@ import SiteLayout from '@/Layouts/SiteLayout.vue';
 import PageHeader from '@/Components/site/PageHeader.vue';
 import ComingSoon from '@/Components/ui/ComingSoon.vue';
 import { Newspaper } from '@lucide/vue';
-import { useParallax } from '@/Composables/useParallax';
 import type { PublicArticle } from '@/lib/articles';
 
 defineOptions({ layout: SiteLayout });
@@ -21,9 +20,6 @@ defineProps<{
     article:
         | (PublicArticle & {
               body: string | null;
-              seoTitle: string | null;
-              seoDescription: string | null;
-              ogImage: string;
           })
         | null;
 }>();
@@ -31,27 +27,15 @@ defineProps<{
 // Photo mise en avant au-dessus de l'en-tête et du contenu (demande explicite : en plus de
 // celle déjà en arrière-plan de PageHeader, pas à sa place — cf. commentaire sur PageHeader
 // plus bas, laissé strictement inchangé).
-const featuredImage = ref<HTMLImageElement | null>(null);
-useParallax(featuredImage, 8);
 </script>
 
 <template>
     <template v-if="article">
-        <Head :title="article.seoTitle || article.title">
-            <meta name="description" :content="article.seoDescription || article.excerpt || undefined" />
-
-            <!-- Open Graph / partage social (CLAUDE.md §6 : "SEO par article, title/description/OG
-                 image") — og:image reprend la couverture de l'article, ou le logo à défaut plutôt
-                 que de laisser les réseaux sociaux choisir une image au hasard sur la page. -->
-            <meta property="og:type" content="article" />
-            <meta property="og:title" :content="article.seoTitle || article.title" />
-            <meta
-                property="og:description"
-                :content="article.seoDescription || article.excerpt || undefined"
-            />
-            <meta property="og:image" :content="article.ogImage" />
-            <meta name="twitter:card" content="summary_large_image" />
-        </Head>
+        <!-- Titre seul : la description et les balises Open Graph sont rendues par PHP
+             (App\Support\SiteSeo + Site\ArticleController), parce que les robots de Facebook
+             et WhatsApp n'exécutent pas JavaScript et ne verraient jamais celles-ci. `<Head>`
+             reste utile pour le titre lors des navigations SPA. -->
+        <Head :title="article.title" />
 
         <!-- En-tête éditorial : image de fond laissée strictement inchangée (demande explicite
         de ne pas y toucher), la photo ci-dessus s'ajoute simplement au-dessus. -->
@@ -71,10 +55,9 @@ useParallax(featuredImage, 8);
         >
             <div class="aspect-video overflow-hidden rounded-2xl bg-ink shadow-lg shadow-ink/10">
                 <img
-                    ref="featuredImage"
                     :src="article.image"
                     :alt="article.title"
-                    class="h-full w-full scale-125 object-cover"
+                    class="h-full w-full object-cover"
                     loading="eager"
                 />
             </div>

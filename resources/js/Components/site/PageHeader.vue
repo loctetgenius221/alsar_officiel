@@ -10,7 +10,6 @@
 import { ref } from 'vue';
 import MotifDivider from '@/Components/ui/MotifDivider.vue';
 import { useScrollReveal } from '@/Composables/useScrollReveal';
-import { useParallax } from '@/Composables/useParallax';
 
 const props = withDefaults(
     defineProps<{
@@ -42,20 +41,16 @@ const imagePositionClass = {
 
 const el = ref<HTMLElement | null>(null);
 useScrollReveal(el, { stagger: 0.1, start: 'top 100%' });
-
-const imgEl = ref<HTMLImageElement | null>(null);
-if (props.image) useParallax(imgEl, 8);
 </script>
 
 <template>
-    <header class="relative overflow-hidden" :class="image ? 'bg-ink' : ''">
+    <header class="relative overflow-hidden" :class="image ? 'surface-ink' : ''">
         <template v-if="image">
             <div class="absolute inset-0">
                 <img
-                    ref="imgEl"
                     :src="image"
                     :alt="imageAlt"
-                    class="h-full w-full scale-125 object-cover"
+                    class="h-full w-full object-cover"
                     :class="imagePositionClass"
                     loading="eager"
                 />
@@ -81,7 +76,10 @@ if (props.image) useParallax(imgEl, 8);
                 </p>
                 <h1
                     class="mt-4 font-display"
-                    :class="[compact ? 'text-display-3' : 'text-display-2', image ? 'text-paper' : 'text-ink']"
+                    :class="[
+                        compact ? 'text-display-3' : 'text-display-2',
+                        image ? 'text-paper' : 'text-ink',
+                    ]"
                 >
                     {{ title }}
                 </h1>

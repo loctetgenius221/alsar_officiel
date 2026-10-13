@@ -4,15 +4,22 @@ use App\Domain\Members\Models\Member;
 use App\Mail\MembershipConfirmed;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * Le débit (throttle:5,1) n'est pas ce que ces tests vérifient — on le désactive ici pour ne
  * pas coupler le nombre de tests à la limite de la route de soumission.
+ *
+ * `withoutDefer()` : l'email de confirmation part par `defer()` (cf. SendMembershipEmail),
+ * donc APRÈS la réponse HTTP, au moment où le middleware `InvokeDeferredCallbacks` vide la
+ * pile. Dans un test, cette phase n'a pas lieu — sans cela, aucune assertion sur l'envoi ne
+ * pourrait aboutir. `withoutDefer()` exécute les rappels immédiatement.
  */
 beforeEach(function () {
     $this->withoutMiddleware(ThrottleRequests::class);
+    $this->withoutDefer();
 });
 
 function validAdhesionPayload(array $overrides = []): array
@@ -51,7 +58,7 @@ it('active le membre immédiatement lors de la soumission du wizard (cotisation 
 
     $response->assertRedirect(route('adhesion.confirmation', $member->membership_code));
 
-    Mail::assertQueued(MembershipConfirmed::class);
+    Mail::assertSent(MembershipConfirmed::class);
 });
 
 it('active le membre et confirme le paiement simulé quand une cotisation est choisie', function () {
@@ -74,7 +81,7 @@ it('active le membre et confirme le paiement simulé quand une cotisation est ch
 
     $response->assertRedirect(route('adhesion.confirmation', $member->membership_code));
 
-    Mail::assertQueued(MembershipConfirmed::class);
+    Mail::assertSent(MembershipConfirmed::class);
 });
 
 it('calcule toujours le montant depuis la configuration serveur, jamais depuis le client', function () {
@@ -110,7 +117,7 @@ it('ne retraite pas un webhook rejoué avec la même référence (idempotence)',
 
     // Confirmé une seule fois au total (par la passerelle simulée), les deux rejeux du
     // webhook ne doivent pas déclencher un second email ni un second traitement.
-    Mail::assertQueued(MembershipConfirmed::class, 1);
+    Mail::assertSent(MembershipConfirmed::class, 1);
 
     $member->refresh();
     $payment->refresh();
@@ -177,7 +184,7 @@ it('chiffre le numéro de pièce d\'identité au repos', function () {
     $member = Member::where('email', 'piece-identite@example.com')->first();
 
     // La colonne brute en base ne doit jamais contenir la valeur en clair.
-    $raw = \Illuminate\Support\Facades\DB::table('members')->where('id', $member->id)->value('id_document_number');
+    $raw = DB::table('members')->where('id', $member->id)->value('id_document_number');
     expect($raw)->not->toBe('1234567890123');
 
     // Mais le modèle la déchiffre correctement via le cast `encrypted`.

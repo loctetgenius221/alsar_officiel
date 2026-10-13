@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+
+# Back-office : jamais d'intérêt pour un moteur, et derrière authentification de toute façon.
+Disallow: /admin
+
+# Les pages liées à une personne (confirmation d'adhésion, carte de membre, vérification d'un
+# code) ne sont PAS bloquées ici volontairement : elles renvoient déjà un `noindex` dans leur
+# HTML (App\Support\SiteSeo). Les interdire au crawl empêcherait les moteurs de lire ce
+# noindex, et une URL déjà connue resterait indexée sans jamais pouvoir en sortir.
+
+Sitemap: https://www.alsar.sn/sitemap.xml

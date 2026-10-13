@@ -52,7 +52,11 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    // Repli sur le domaine officiel, et non sur 'http://localhost'. Ce n'est pas cosmétique :
+    // cette valeur est encodée DANS les QR codes des cartes de membre et dans les liens des
+    // emails de confirmation. Une carte imprimée avec un QR pointant sur localhost est
+    // définitivement perdue — on ne peut pas la rattraper après distribution.
+    'url' => env('APP_URL', 'https://www.alsar.sn'),
 
     /*
     |--------------------------------------------------------------------------

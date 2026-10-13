@@ -7,14 +7,13 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Payments\Models\MembershipPayment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class MembershipConfirmed extends Mailable implements ShouldQueue
+class MembershipConfirmed extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -37,8 +36,11 @@ class MembershipConfirmed extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
+        // Les deux parties d'un message multipart : un email envoyé en HTML seul est pénalisé
+        // par les filtres anti-spam, et illisible pour qui configure son client en texte brut.
         return new Content(
             view: 'emails.membership-confirmed',
+            text: 'emails.membership-confirmed-text',
         );
     }
 
@@ -47,7 +49,7 @@ class MembershipConfirmed extends Mailable implements ShouldQueue
      */
     public function attachments(): array
     {
-        $qrCode = (new BuildMembershipQrCode())->handle($this->member);
+        $qrCode = (new BuildMembershipQrCode)->handle($this->member);
 
         $pdf = Pdf::loadView('pdf.membership-card', [
             'member' => $this->member,

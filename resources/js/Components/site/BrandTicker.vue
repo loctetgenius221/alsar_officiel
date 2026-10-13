@@ -26,7 +26,7 @@ const phrases = computed(() => props.section.phrases.map((phrase) => phrase.text
 </script>
 
 <template>
-    <section ref="sectionRef" class="bg-ink py-6">
+    <section ref="sectionRef" class="surface-ink py-6">
         <div class="group overflow-hidden">
             <div class="flex w-max animate-marquee items-center group-hover:[animation-play-state:paused]">
                 <div v-for="n in 2" :key="n" class="flex shrink-0 items-center" :aria-hidden="n === 2">

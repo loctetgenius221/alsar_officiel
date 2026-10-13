@@ -14,6 +14,7 @@ import { ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import SiteLayout from '@/Layouts/SiteLayout.vue';
 import PageHeader from '@/Components/site/PageHeader.vue';
+import PageCta from '@/Components/site/PageCta.vue';
 import { useScrollReveal } from '@/Composables/useScrollReveal';
 import { resolveIcon } from '@/lib/icon-registry';
 import type { PageImageField } from '@/types/inertia';
@@ -33,7 +34,11 @@ interface ProgrammeSections {
     axes: { axes: Axis[] };
 }
 
-const props = defineProps<{ sections: ProgrammeSections; seoTitle: string | null; seoDescription: string | null }>();
+const props = defineProps<{
+    sections: ProgrammeSections;
+    seoTitle: string | null;
+    seoDescription: string | null;
+}>();
 const axes = props.sections.axes.axes;
 
 const introRef = ref<HTMLElement | null>(null);
@@ -70,7 +75,11 @@ useScrollReveal(introRef, { stagger: 0.1, start: 'top 100%' });
             <div class="mx-auto max-w-6xl px-6 py-16 sm:px-10">
                 <div class="grid gap-6 lg:grid-cols-12 lg:gap-10">
                     <div class="lg:col-span-3">
-                        <component :is="resolveIcon(axis.icon)" class="size-7 text-gold-600" aria-hidden="true" />
+                        <component
+                            :is="resolveIcon(axis.icon)"
+                            class="size-7 text-gold-600"
+                            aria-hidden="true"
+                        />
                         <p class="mt-4 font-display text-5xl text-gold-500/40">
                             {{ String(i + 1).padStart(2, '0') }}
                         </p>
@@ -89,5 +98,13 @@ useScrollReveal(introRef, { stagger: 0.1, start: 'top 100%' });
                 </div>
             </div>
         </section>
+
+        <PageCta
+            title="Ces six axes vous parlent ?"
+            body="Un programme ne se construit pas dans un bureau. Rejoignez ALSAR pour le porter dans votre commune, ou retrouvez les actions déjà menées sur le terrain."
+            cta-label="Rejoindre ALSAR"
+            secondary-label="Voir les actions sur le terrain"
+            secondary-href="/actualites"
+        />
     </div>
 </template>

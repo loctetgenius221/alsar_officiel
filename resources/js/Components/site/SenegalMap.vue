@@ -5,8 +5,12 @@
  * pour la page /regions : régions cliquables et activables au clavier (Entrée/Espace),
  * émet `select` avec le nom de la région — aucune donnée par région n'est stockée ici,
  * c'est au composant parent de savoir quoi afficher (honnêteté des données, cf. CLAUDE.md).
- * ALSAR étant présent dans les 14 régions, toutes sont teintées en or (présence confirmée) ;
- * seule la région sélectionnée/mise en avant ressort en or plein.
+ * Lisibilité : les régions sont en sable (`sand-200`), l'or est réservé à la région mise en
+ * avant — le siège, ou celle que l'on vient de sélectionner sur /regions. Auparavant TOUTES
+ * les régions étaient en or à 45 % d'opacité : la carte se confondait avec le fond papier
+ * (#e6ddcc contre #faf7f1, une fois l'opacité appliquée il ne restait presque rien), et l'or
+ * ne distinguait plus rien puisqu'il était partout. Une couleur d'accent qui sert à tout ne
+ * signale plus rien.
  * Les régions apparaissent en fondu échelonné à l'entrée dans l'écran (chaque région
  * "s'allume" l'une après l'autre) — illustre la présence nationale sans distraire de la
  * lecture. Uniquement l'opacité anime (jamais la géométrie), pour ne jamais créer
@@ -88,7 +92,7 @@ function select(name: string) {
                 :d="region.path"
                 class="stroke-paper stroke-[1.5] transition-colors duration-200 outline-none"
                 :class="[
-                    isActive(region.name) ? 'fill-gold-500' : 'fill-gold-300/45 hover:fill-gold-300/70',
+                    isActive(region.name) ? 'fill-gold-500' : 'fill-sand-200 hover:fill-sand-300',
                     interactive ? 'cursor-pointer focus-visible:fill-terracotta-500' : '',
                 ]"
                 :tabindex="interactive ? 0 : -1"
@@ -103,8 +107,10 @@ function select(name: string) {
         </g>
 
         <g v-if="dakarCenter" class="pointer-events-none" aria-hidden="true">
-            <circle :cx="dakarCenter.x" :cy="dakarCenter.y" r="4" class="animate-ping-halo fill-gold-500" />
-            <circle :cx="dakarCenter.x" :cy="dakarCenter.y" r="2.5" class="fill-gold-600" />
+            <!-- Pastille du siège : encre sur or, lisible. Un point or-600 sur une région
+                 or-500 se confondait avec elle. -->
+            <circle :cx="dakarCenter.x" :cy="dakarCenter.y" r="4" class="animate-ping-halo fill-gold-700" />
+            <circle :cx="dakarCenter.x" :cy="dakarCenter.y" r="2.5" class="fill-ink" />
         </g>
     </svg>
 </template>

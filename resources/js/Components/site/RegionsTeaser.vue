@@ -25,13 +25,6 @@ useScrollReveal(textCol, { stagger: 0.12, delay: 0.15 });
 
 <template>
     <section class="relative mx-auto max-w-6xl overflow-hidden px-6 py-20 sm:px-10">
-        <!-- <img
-            :src="baobabPattern"
-            alt=""
-            aria-hidden="true"
-            class="pointer-events-none absolute -right-16 bottom-0 z-1 w-64 opacity-20 sm:-right-24 sm:w-80 sm:opacity-25 lg:-right-32 lg:w-[28rem] lg:opacity-30"
-        /> -->
-
         <div class="relative z-5 grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-10">
             <div ref="mapCol" class="lg:col-span-5">
                 <div class="aspect-square sm:aspect-4/5 lg:aspect-square">
@@ -44,7 +37,9 @@ useScrollReveal(textCol, { stagger: 0.12, delay: 0.15 });
 
             <div ref="textCol" class="lg:col-span-6 lg:col-start-7">
                 <MotifDivider align="left" size="base" />
-                <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ section.kicker }}</p>
+                <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">
+                    {{ section.kicker }}
+                </p>
                 <h2 class="mt-4 font-display text-display-3 text-ink">
                     {{ section.title }}
                 </h2>

@@ -65,7 +65,12 @@ useScrollReveal(orgRef, { stagger: 0.1 });
     />
     <SectionNav :items="navSections" />
 
-    <section id="vision" class="relative mx-auto max-w-6xl scroll-mt-36 overflow-hidden px-6 py-20 sm:px-10">
+    <!-- Pas d'`overflow-hidden` sur cette section : un seul ancêtre avec un overflow
+             different de `visible` suffit à désactiver tout `position: sticky` à l'intérieur
+             (la photo de la frise, ci-dessous, restait donc figée en haut et laissait du vide).
+             Il servait à rogner le motif baobab décoratif, aujourd'hui désactivé ; s'il revient,
+             le rogner sur SON propre conteneur, jamais sur la section entière. -->
+    <section id="vision" class="relative mx-auto max-w-6xl scroll-mt-36 px-6 py-20 sm:px-10">
         <!-- <BaobabMotif side="right" vertical="bottom" /> -->
 
         <div class="relative z-5 grid gap-12 lg:grid-cols-12 lg:gap-10">
@@ -87,7 +92,11 @@ useScrollReveal(orgRef, { stagger: 0.1 });
             </div>
 
             <ul ref="valuesRef" class="grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:col-span-6 lg:col-start-7">
-                <li v-for="value in sections.vision.values" :key="value.label" class="border-t border-sand-200 pt-4">
+                <li
+                    v-for="value in sections.vision.values"
+                    :key="value.label"
+                    class="border-t border-sand-200 pt-4"
+                >
                     <p class="font-display text-lg text-ink">{{ value.label }}</p>
                     <p class="mt-1 font-sans text-sm text-ink-soft">{{ value.text }}</p>
                 </li>
@@ -115,7 +124,10 @@ useScrollReveal(orgRef, { stagger: 0.1 });
                 </p>
                 <h2 class="mt-4 font-display text-display-3 text-ink">{{ sections.organisation.title }}</h2>
 
-                <dl v-if="sections.organisation.facts.length" class="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-4 border-t border-sand-200 pt-6">
+                <dl
+                    v-if="sections.organisation.facts.length"
+                    class="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-4 border-t border-sand-200 pt-6"
+                >
                     <template v-for="fact in sections.organisation.facts" :key="fact.label">
                         <dt class="font-sans text-sm text-sand-600">{{ fact.label }}</dt>
                         <dd class="font-sans text-sm text-ink">{{ fact.value }}</dd>
@@ -131,7 +143,9 @@ useScrollReveal(orgRef, { stagger: 0.1 });
 
     <section id="statuts" class="mx-auto max-w-6xl scroll-mt-36 px-6 py-20 sm:px-10">
         <MotifDivider align="left" size="base" />
-        <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">{{ sections.statuts.kicker }}</p>
+        <p class="mt-2 font-sans text-sm tracking-wide text-gold-700 uppercase">
+            {{ sections.statuts.kicker }}
+        </p>
         <h2 class="mt-4 max-w-2xl font-display text-display-3 text-ink">
             {{ sections.statuts.title }}
         </h2>

@@ -8,6 +8,7 @@ import { ref } from 'vue';
 import SiteLayout from '@/Layouts/SiteLayout.vue';
 import PageHeader from '@/Components/site/PageHeader.vue';
 import MotifDivider from '@/Components/ui/MotifDivider.vue';
+import BrandSeal from '@/Components/ui/BrandSeal.vue';
 import { CheckCircle2, Download, ShieldCheck } from '@lucide/vue';
 import { useScrollReveal } from '@/Composables/useScrollReveal';
 
@@ -44,7 +45,15 @@ useScrollReveal(panelRef, { y: 16, duration: 0.7 });
         </template>
 
         <template v-else-if="member.status === 'active'">
-            <div ref="panelRef" class="mt-8 border border-sand-300 bg-paper p-8 sm:p-12">
+            <div ref="panelRef" class="relative mt-8 border border-sand-300 bg-paper p-8 sm:p-12">
+                <!-- Sceau : il n'apparaît que sur une adhésion CONFIRMÉE, et nulle part ailleurs
+                     sur le site. C'est tout son sens — un cachet se pose sur un document valide,
+                     pas en décoration. Il avait d'abord été placé sur le bloc d'adhésion de
+                     l'accueil : PhotoStack y porte déjà un médaillon rond avec le même logo, et
+                     deux marques circulaires dans le même écran se neutralisent. Masqué sous
+                     `sm`, où la place manque sans empiéter sur le nom de l'adhérent. -->
+                <BrandSeal class="pointer-events-none absolute top-8 right-8 hidden w-20 sm:block" />
+
                 <div class="flex items-center gap-2 text-gold-600">
                     <CheckCircle2 class="size-5" aria-hidden="true" />
                     <p class="font-sans text-xs font-semibold tracking-wide uppercase">Adhésion confirmée</p>
@@ -52,7 +61,7 @@ useScrollReveal(panelRef, { y: 16, duration: 0.7 });
 
                 <MotifDivider align="left" size="sm" />
 
-                <p class="mt-4 font-display text-display-2 text-ink">{{ member.fullName }}</p>
+                <p class="mt-4 font-display text-display-2 text-ink sm:pr-28">{{ member.fullName }}</p>
                 <p class="mt-2 font-sans text-sm text-ink-soft">
                     Code d'adhésion <span class="font-medium text-ink">{{ member.membershipCode }}</span>
                     <template v-if="member.joinedAt">

@@ -20,6 +20,7 @@ import { computed, ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import ImageCarousel from '@/Components/ui/ImageCarousel.vue';
 import MagneticButton from '@/Components/ui/MagneticButton.vue';
+import ScrollCue from '@/Components/ui/ScrollCue.vue';
 import { useGsapReveal } from '@/Composables/useGsapReveal';
 import { useScrollReveal } from '@/Composables/useScrollReveal';
 import type { PageImageField } from '@/types/inertia';
@@ -52,7 +53,7 @@ const slides = computed(() =>
 </script>
 
 <template>
-    <section class="relative min-h-[min(92vh,46rem)] overflow-hidden bg-ink">
+    <section class="surface-ink relative min-h-[min(92vh,46rem)] overflow-hidden">
         <div class="absolute inset-0">
             <ImageCarousel :slides="slides" />
         </div>
@@ -83,7 +84,9 @@ const slides = computed(() =>
                     <div
                         class="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4"
                     >
-                        <MagneticButton href="/rejoignez-nous">{{ section.cta_primary_label }}</MagneticButton>
+                        <MagneticButton href="/rejoignez-nous">{{
+                            section.cta_primary_label
+                        }}</MagneticButton>
                         <Link
                             href="/programme"
                             class="inline-flex items-center gap-2 border border-paper/50 px-6 py-3 font-sans text-sm font-medium text-paper transition-colors duration-300 hover:border-paper hover:bg-paper/10"
@@ -94,5 +97,7 @@ const slides = computed(() =>
                 </div>
             </div>
         </div>
+
+        <ScrollCue />
     </section>
 </template>

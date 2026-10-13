@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Site;
 use App\Domain\Content\Models\Article;
 use App\Domain\Content\Models\Category;
 use App\Http\Controllers\Controller;
+use App\Support\SiteSeo;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response as InertiaResponse;
 
@@ -32,15 +34,21 @@ class ArticleController extends Controller
             'article' => $article ? [
                 ...$article->toPublicArray(),
                 'body' => $article->body,
-                'seoTitle' => $article->seo_title,
-                'seoDescription' => $article->seo_description,
-                // URL absolue exigée par Open Graph (les scrapers Facebook/Twitter ne résolvent
-                // pas les chemins relatifs) — le logo sert de repli si l'article n'a pas de
-                // couverture, jamais nu/vide sur un partage social. `url()` complète un chemin
-                // racine hérité (`/images/...`) avec le domaine ; une URL déjà absolue (cas
-                // normal, résolue par Storage::url()) traverse `url()` inchangée.
-                'ogImage' => url($article->coverImageUrl() ?? '/images/logo-alsar.png'),
             ] : null,
-        ]);
+        ])
+            // Métadonnées de partage rendues par PHP, pas par `<Head>` côté Vue : les robots
+            // de Facebook et WhatsApp n'exécutent pas JavaScript (cf. App\Support\SiteSeo).
+            // Elles remplacent ici le défaut déduit de la route, l'article connaissant son
+            // vrai titre, son vrai résumé et sa vraie couverture.
+            ->withViewData(['seo' => $article ? [
+                'title' => ($article->seo_title ?: $article->title).' | '.SiteSeo::SITE_NAME,
+                'description' => $article->seo_description
+                    ?: $article->excerpt
+                    ?: Str::limit(strip_tags((string) $article->body), 155),
+                // Repli sur le visuel du site : un partage sans vignette passe beaucoup moins
+                // bien dans un fil WhatsApp qu'un partage illustré.
+                'image' => $article->coverImageUrl() ?: SiteSeo::DEFAULT_IMAGE,
+                'type' => 'article',
+            ] : null]);
     }
 }

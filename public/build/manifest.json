@@ -64,12 +64,20 @@
       "_createLucideIcon-JQYoB9vk.js"
     ]
   },
-  "_PageHeader-CFj0fLt7.js": {
-    "file": "assets/PageHeader-CFj0fLt7.js",
+  "_PageCta-VbeXYfRG.js": {
+    "file": "assets/PageCta-VbeXYfRG.js",
+    "name": "PageCta",
+    "imports": [
+      "_createLucideIcon-JQYoB9vk.js",
+      "_useScrollReveal-DYS0vrPX.js"
+    ]
+  },
+  "_PageHeader-lzeuIrk5.js": {
+    "file": "assets/PageHeader-lzeuIrk5.js",
     "name": "PageHeader",
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js"
+      "_useScrollReveal-DYS0vrPX.js"
     ]
   },
   "_Pagination-CKdZoWdV.js": {
@@ -79,12 +87,11 @@
       "_createLucideIcon-JQYoB9vk.js"
     ]
   },
-  "_PhotoFrame-DGiSLJWe.js": {
-    "file": "assets/PhotoFrame-DGiSLJWe.js",
+  "_PhotoFrame-BFAVloA1.js": {
+    "file": "assets/PhotoFrame-BFAVloA1.js",
     "name": "PhotoFrame",
     "imports": [
-      "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js"
+      "_createLucideIcon-JQYoB9vk.js"
     ]
   },
   "_RichTextEditor-Czn2pC9F.js": {
@@ -113,8 +120,8 @@
       "_createLucideIcon-JQYoB9vk.js"
     ]
   },
-  "_SenegalMap-C1Y1DERL.js": {
-    "file": "assets/SenegalMap-C1Y1DERL.js",
+  "_SenegalMap-DxhR0rUu.js": {
+    "file": "assets/SenegalMap-DxhR0rUu.js",
     "name": "SenegalMap",
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
@@ -133,18 +140,25 @@
       "_Badge-B6gWSsoc.js"
     ]
   },
-  "_Timeline-CpGdd50M.js": {
-    "file": "assets/Timeline-CpGdd50M.js",
+  "_Timeline-BF1PzjGL.js": {
+    "file": "assets/Timeline-BF1PzjGL.js",
     "name": "Timeline",
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
-      "_PhotoFrame-DGiSLJWe.js"
+      "_useScrollReveal-DYS0vrPX.js",
+      "_PhotoFrame-BFAVloA1.js"
     ]
   },
   "_ban-Bwx25bTi.js": {
     "file": "assets/ban-Bwx25bTi.js",
     "name": "ban",
+    "imports": [
+      "_createLucideIcon-JQYoB9vk.js"
+    ]
+  },
+  "_chevron-down-Cne7xuF_.js": {
+    "file": "assets/chevron-down-Cne7xuF_.js",
+    "name": "chevron-down",
     "imports": [
       "_createLucideIcon-JQYoB9vk.js"
     ]
@@ -327,6 +341,13 @@
       "_createLucideIcon-JQYoB9vk.js"
     ]
   },
+  "_useBrokenImages-ATnRuLg1.js": {
+    "file": "assets/useBrokenImages-ATnRuLg1.js",
+    "name": "useBrokenImages",
+    "imports": [
+      "_createLucideIcon-JQYoB9vk.js"
+    ]
+  },
   "_useCountUp-Bx9Ui5c9.js": {
     "file": "assets/useCountUp-Bx9Ui5c9.js",
     "name": "useCountUp",
@@ -336,9 +357,16 @@
       "_useReducedMotion-DVr1EAl6.js"
     ]
   },
-  "_useParallax-DVMiC4Zw.js": {
-    "file": "assets/useParallax-DVMiC4Zw.js",
-    "name": "useParallax",
+  "_useReducedMotion-DVr1EAl6.js": {
+    "file": "assets/useReducedMotion-DVr1EAl6.js",
+    "name": "useReducedMotion",
+    "imports": [
+      "_createLucideIcon-JQYoB9vk.js"
+    ]
+  },
+  "_useScrollReveal-DYS0vrPX.js": {
+    "file": "assets/useScrollReveal-DYS0vrPX.js",
+    "name": "useScrollReveal",
     "imports": [
       "_x-BX4RCNyk.js",
       "_createLucideIcon-JQYoB9vk.js",
@@ -347,13 +375,6 @@
       "_mail-t15o9qED.js",
       "_map-pin-CaR9k4dk.js",
       "_useReducedMotion-DVr1EAl6.js"
-    ]
-  },
-  "_useReducedMotion-DVr1EAl6.js": {
-    "file": "assets/useReducedMotion-DVr1EAl6.js",
-    "name": "useReducedMotion",
-    "imports": [
-      "_createLucideIcon-JQYoB9vk.js"
     ]
   },
   "_useUnsavedChanges-D1MStqk-.js": {
@@ -433,7 +454,7 @@
     "src": "public/images/pattern-baobab.svg"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DY4oSNjw.css",
+    "file": "assets/app-BGcojWJe.css",
     "name": "app",
     "names": [
       "app.css"
@@ -606,7 +627,7 @@
     ]
   },
   "resources/js/Pages/Admin/PageContent/Edit.vue": {
-    "file": "assets/Edit-T4J8JqjE.js",
+    "file": "assets/Edit-DTjtwu3c.js",
     "name": "Edit",
     "src": "resources/js/Pages/Admin/PageContent/Edit.vue",
     "isDynamicEntry": true,
@@ -614,6 +635,7 @@
       "_createLucideIcon-JQYoB9vk.js",
       "_RichTextEditor-Czn2pC9F.js",
       "_icon-registry-Bv892Ivi.js",
+      "_chevron-down-Cne7xuF_.js",
       "_Card-tfIDHbEP.js",
       "_save-CWTYcDy6.js",
       "_form-errors-P8MxI7hm.js",
@@ -716,31 +738,33 @@
     ]
   },
   "resources/js/Pages/Site/ActualiteDetail.vue": {
-    "file": "assets/ActualiteDetail-CkofHqWe.js",
+    "file": "assets/ActualiteDetail-zZsdLsQI.js",
     "name": "ActualiteDetail",
     "src": "resources/js/Pages/Site/ActualiteDetail.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_newspaper-DsD52kpB.js",
-      "_PageHeader-CFj0fLt7.js",
+      "_PageHeader-lzeuIrk5.js",
       "_ComingSoon-D1uyGqnW.js"
     ]
   },
   "resources/js/Pages/Site/Actualites.vue": {
-    "file": "assets/Actualites-CdjOQEia.js",
+    "file": "assets/Actualites-DBFYWhZ2.js",
     "name": "Actualites",
     "src": "resources/js/Pages/Site/Actualites.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
-      "_PageHeader-CFj0fLt7.js"
+      "_useScrollReveal-DYS0vrPX.js",
+      "_newspaper-DsD52kpB.js",
+      "_PageHeader-lzeuIrk5.js",
+      "_useBrokenImages-ATnRuLg1.js"
     ]
   },
   "resources/js/Pages/Site/Adhesion.vue": {
-    "file": "assets/Adhesion-Bz05nA8F.js",
+    "file": "assets/Adhesion-Dsf6peRf.js",
     "name": "Adhesion",
     "src": "resources/js/Pages/Site/Adhesion.vue",
     "isDynamicEntry": true,
@@ -748,38 +772,38 @@
       "_x-BX4RCNyk.js",
       "_createLucideIcon-JQYoB9vk.js",
       "_vee-validate-CUOCVhAA.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_field-labels-CqcX90Ao.js",
-      "_PageHeader-CFj0fLt7.js"
+      "_PageHeader-lzeuIrk5.js"
     ]
   },
   "resources/js/Pages/Site/AdhesionConfirmation.vue": {
-    "file": "assets/AdhesionConfirmation-j7yDfJHy.js",
+    "file": "assets/AdhesionConfirmation-pI-fT5_p.js",
     "name": "AdhesionConfirmation",
     "src": "resources/js/Pages/Site/AdhesionConfirmation.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_circle-check-CloV0UyF.js",
       "_download-UMWFAinG.js",
       "_shield-check-BFEhIEyo.js",
-      "_PageHeader-CFj0fLt7.js"
+      "_PageHeader-lzeuIrk5.js"
     ]
   },
   "resources/js/Pages/Site/Confidentialite.vue": {
-    "file": "assets/Confidentialite-COZBCGDf.js",
+    "file": "assets/Confidentialite-y8TDylNi.js",
     "name": "Confidentialite",
     "src": "resources/js/Pages/Site/Confidentialite.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
-      "_PageHeader-CFj0fLt7.js"
+      "_useScrollReveal-DYS0vrPX.js",
+      "_PageHeader-lzeuIrk5.js"
     ]
   },
   "resources/js/Pages/Site/Home.vue": {
-    "file": "assets/Home-DHNkZD-V.js",
+    "file": "assets/Home-BAMK_LY-.js",
     "name": "Home",
     "src": "resources/js/Pages/Site/Home.vue",
     "isDynamicEntry": true,
@@ -787,20 +811,23 @@
       "_x-BX4RCNyk.js",
       "_createLucideIcon-JQYoB9vk.js",
       "_ScrollTrigger-DDi3XPDo.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_icon-registry-Bv892Ivi.js",
+      "_chevron-down-Cne7xuF_.js",
       "_chevron-right-BRbazHw0.js",
+      "_newspaper-DsD52kpB.js",
       "_useReducedMotion-DVr1EAl6.js",
       "_useCountUp-Bx9Ui5c9.js",
-      "_PhotoFrame-DGiSLJWe.js",
-      "_SenegalMap-C1Y1DERL.js"
+      "_useBrokenImages-ATnRuLg1.js",
+      "_PhotoFrame-BFAVloA1.js",
+      "_SenegalMap-DxhR0rUu.js"
     ],
     "assets": [
       "assets/pattern-baobab-B8sInWb5.svg"
     ]
   },
   "resources/js/Pages/Site/Mediatheque.vue": {
-    "file": "assets/Mediatheque-DvfBjVMm.js",
+    "file": "assets/Mediatheque-D24kSt0K.js",
     "name": "Mediatheque",
     "src": "resources/js/Pages/Site/Mediatheque.vue",
     "isDynamicEntry": true,
@@ -809,94 +836,97 @@
       "_createLucideIcon-JQYoB9vk.js",
       "_DialogClose-DV5niHTO.js",
       "_menu-9FCj3MnH.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_chevron-right-BRbazHw0.js",
       "_download-UMWFAinG.js",
       "_mic-D6SI2rsq.js",
-      "_PageHeader-CFj0fLt7.js",
-      "_ComingSoon-D1uyGqnW.js"
+      "_PageHeader-lzeuIrk5.js",
+      "_ComingSoon-D1uyGqnW.js",
+      "_PageCta-VbeXYfRG.js"
     ]
   },
   "resources/js/Pages/Site/MentionsLegales.vue": {
-    "file": "assets/MentionsLegales-yQmRn72g.js",
+    "file": "assets/MentionsLegales-BaF9mBUf.js",
     "name": "MentionsLegales",
     "src": "resources/js/Pages/Site/MentionsLegales.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
-      "_PageHeader-CFj0fLt7.js"
+      "_useScrollReveal-DYS0vrPX.js",
+      "_PageHeader-lzeuIrk5.js"
     ]
   },
   "resources/js/Pages/Site/Parti.vue": {
-    "file": "assets/Parti-BxS_IJc3.js",
+    "file": "assets/Parti-TMkLBijj.js",
     "name": "Parti",
     "src": "resources/js/Pages/Site/Parti.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_scroll-text-69Xgrz0p.js",
-      "_PageHeader-CFj0fLt7.js",
+      "_PageHeader-lzeuIrk5.js",
       "_ComingSoon-D1uyGqnW.js",
-      "_Timeline-CpGdd50M.js"
+      "_Timeline-BF1PzjGL.js"
     ]
   },
   "resources/js/Pages/Site/President.vue": {
-    "file": "assets/President-nK0JI58y.js",
+    "file": "assets/President-C_U1Smeg.js",
     "name": "President",
     "src": "resources/js/Pages/Site/President.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_video-Dm8HAG7S.js",
-      "_PageHeader-CFj0fLt7.js",
+      "_PageHeader-lzeuIrk5.js",
       "_ComingSoon-D1uyGqnW.js",
-      "_PhotoFrame-DGiSLJWe.js",
-      "_Timeline-CpGdd50M.js"
+      "_PhotoFrame-BFAVloA1.js",
+      "_Timeline-BF1PzjGL.js"
     ]
   },
   "resources/js/Pages/Site/Programme.vue": {
-    "file": "assets/Programme-CWWx125g.js",
+    "file": "assets/Programme-DwWRUKhF.js",
     "name": "Programme",
     "src": "resources/js/Pages/Site/Programme.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_icon-registry-Bv892Ivi.js",
-      "_PageHeader-CFj0fLt7.js"
+      "_PageHeader-lzeuIrk5.js",
+      "_PageCta-VbeXYfRG.js"
     ]
   },
   "resources/js/Pages/Site/Regions.vue": {
-    "file": "assets/Regions-CV8lSX1K.js",
+    "file": "assets/Regions-4mtpfBPT.js",
     "name": "Regions",
     "src": "resources/js/Pages/Site/Regions.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_map-pin-CaR9k4dk.js",
-      "_PageHeader-CFj0fLt7.js",
-      "_SenegalMap-C1Y1DERL.js"
+      "_PageHeader-lzeuIrk5.js",
+      "_SenegalMap-DxhR0rUu.js",
+      "_PageCta-VbeXYfRG.js"
     ]
   },
   "resources/js/Pages/Site/Verifier.vue": {
-    "file": "assets/Verifier-DkGIO8SR.js",
+    "file": "assets/Verifier-Bs5pqd_q.js",
     "name": "Verifier",
     "src": "resources/js/Pages/Site/Verifier.vue",
     "isDynamicEntry": true,
     "imports": [
       "_createLucideIcon-JQYoB9vk.js",
-      "_useParallax-DVMiC4Zw.js",
+      "_useScrollReveal-DYS0vrPX.js",
       "_circle-check-CloV0UyF.js",
       "_circle-x-BHbmjh4T.js",
-      "_PageHeader-CFj0fLt7.js"
+      "_PageHeader-lzeuIrk5.js"
     ]
   },
   "resources/js/app.ts": {
-    "file": "assets/app-Bee6Zxl_.js",
+    "file": "assets/app-DsTfoMgT.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -942,7 +972,7 @@
       "resources/js/Pages/Site/Verifier.vue"
     ],
     "css": [
-      "assets/app-DY4oSNjw.css"
+      "assets/app-BGcojWJe.css"
     ],
     "assets": [
       "assets/fraunces-vietnamese-standard-normal-Czevyj-6.woff2",

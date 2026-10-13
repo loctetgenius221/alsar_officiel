@@ -3,13 +3,15 @@
  * Pendant vidéo de PhotoFrame : lit uniquement quand le panneau est visible à l'écran
  * (économie de ressources/données) et ne joue jamais si l'utilisateur préfère un motion
  * réduit — dans ce cas la première frame (poster) reste statique.
+ *
+ * Pas de parallax, pour la même raison que PhotoFrame : il imposait un agrandissement de la
+ * source (`scale-125`), donc une perte de netteté et un recadrage subi.
  */
 import { ref } from 'vue';
 import { useIntersectionObserver } from '@vueuse/core';
 import { useReducedMotion } from '@/Composables/useReducedMotion';
-import { useParallax } from '@/Composables/useParallax';
 
-const props = withDefaults(
+withDefaults(
     defineProps<{
         src?: string;
         poster?: string;
@@ -17,8 +19,6 @@ const props = withDefaults(
         caption?: string;
         ratio?: 'portrait' | 'square' | 'video';
         rounded?: boolean;
-        /** Léger parallax vertical au scroll (CLAUDE.md §3.5) — désactivé par défaut. */
-        parallax?: boolean;
     }>(),
     {
         src: undefined,
@@ -26,7 +26,6 @@ const props = withDefaults(
         caption: undefined,
         ratio: 'portrait',
         rounded: false,
-        parallax: false,
     },
 );
 
@@ -41,8 +40,6 @@ useIntersectionObserver(videoEl, ([entry]) => {
         videoEl.value.pause();
     }
 });
-
-if (props.parallax) useParallax(videoEl);
 </script>
 
 <template>
@@ -66,7 +63,6 @@ if (props.parallax) useParallax(videoEl);
                 playsinline
                 preload="metadata"
                 class="h-full w-full object-cover"
-                :class="parallax ? 'scale-125' : ''"
                 :aria-label="alt"
             />
             <div v-else class="flex h-full items-end p-6" role="img" :aria-label="alt">
